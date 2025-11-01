@@ -1,0 +1,67 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block nav %}
+<!-- Hero Section for Laboratories Page -->
+<section class="bg-dark text-white position-relative">
+  <div class="position-absolute w-100 h-100" style="background: url('{% static "assets/img/hero/service-img-1.webp" %}') no-repeat center center; background-size: cover; opacity: 0.3;"></div>
+
+  <div class="container position-relative" style="z-index: 2;">
+    <div class="row justify-content-center text-center py-5">
+      <div class="col-lg-8 py-5">
+        <h1 class="display-3 fw-bolder mb-3">Наши лаборатории</h1>
+        <p class="fs-5 mb-0 text-light">Мы обеспечиваем более персонализированный опыт, адаптированный к уникальным потребностям каждого клиента.</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock nav %}
+
+{% block main %}
+<!-- Laboratories Grid Section -->
+<section class="py-5 py-xl-8 bg-light">
+  <div class="container mb-5">
+    <div class="row justify-content-md-center">
+      <div class="col-12 text-center">
+        <h3 class="fs-6 text-secondary mb-2 text-uppercase">Чем мы занимаемся</h3>
+        <h2 class="display-5 fw-bold mb-0">Список наших специализированных лабораторий</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="container overflow-hidden">
+    <div class="row gy-4 gx-4 justify-content-center">
+      {% for lab in labs %}
+      <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden w-100">
+          <a href="{% url 'lab' lab.slug %}" class="text-decoration-none">
+            <figure class="m-0">
+              <!-- Предполагается, что у модели Lab есть поле image -->
+              <img class="img-fluid bsb-scale bsb-hover-scale-up" loading="lazy" src="{{ lab.image.url }}" alt="{{ lab.name }}" style="height: 220px; width: 100%; object-fit: cover;">
+            </figure>
+          </a>
+          <div class="card-body p-4 d-flex flex-column">
+            <h5 class="card-title fw-bold mb-3">
+                <a href="{% url 'lab' lab.slug %}" class="link-dark text-decoration-none">{{ lab.name }}</a>
+            </h5>
+            <p class="card-text text-secondary mb-4 flex-grow-1">
+                {{ lab.description|truncatewords:20|safe }}
+            </p>
+            <div class="mt-auto">
+                <a href="{% url 'lab' lab.slug %}" class="btn btn-primary rounded-pill px-4">Подробнее</a>
+            </div>
+          </div>
+        </div>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info text-center" role="alert">
+          <h4 class="alert-heading">Лаборатории не найдены</h4>
+          <p>В данный момент информация о лабораториях не доступна. Пожалуйста, зайдите позже.</p>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock main %}

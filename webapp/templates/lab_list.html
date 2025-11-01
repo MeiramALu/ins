@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+
+{% block title %}Наши лаборатории{% endblock %}
+
+{% block content %}
+<div class="container">
+    <h1>Наши лаборатории</h1>
+
+    <div class="lab-grid">
+        {% if labs %}
+            {% for lab in labs %}
+                <div class="lab-card">
+                    {% if lab.image %}
+                        <img src="{{ lab.image.url }}" alt="{{ lab.name }}">
+                    {% endif %}
+                    <h2><a href="#">{{ lab.name }}</a></h2>
+                    <p>{{ lab.description|safe|truncatewords:20 }}</p>
+                </div>
+            {% endfor %}
+        {% else %}
+            <p>На данный момент информация о лабораториях отсутствует.</p>
+        {% endif %}
+    </div>
+</div>
+{% endblock %}

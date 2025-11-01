@@ -1,0 +1,64 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block nav %}
+<!-- Hero Section for Lab Page -->
+<section class="bg-dark text-white position-relative">
+  <!-- Используйте изображение лаборатории, если оно есть, иначе - плейсхолдер -->
+  <div class="position-absolute w-100 h-100" style="background: url('{% static "assets/img/hero/service-img-1.webp" %}') no-repeat center center; background-size: cover; opacity: 0.3;"></div>
+
+  <div class="container position-relative" style="z-index: 2;">
+    <div class="row justify-content-center text-center py-5">
+      <div class="col-lg-8 py-5">
+        <h1 class="display-3 fw-bolder mb-3">{{lab.name}}</h1>
+        <p class="fs-5 mb-0 text-light">{{lab.description|safe}}</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock nav %}
+
+{% block main %}
+<!-- Lab Fields/Specializations Section -->
+<section class="py-5 py-xl-8 bg-light">
+  <div class="container mb-5">
+    <div class="row justify-content-md-center">
+      <div class="col-12 text-center">
+        <h3 class="fs-6 text-secondary mb-2 text-uppercase">Направления деятельности</h3>
+        <h2 class="display-5 fw-bold mb-0">Специализации лаборатории</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="container overflow-hidden">
+    <div class="row gy-4 gx-4 justify-content-center">
+      {% for f in lab_fields %}
+      <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+        <div class="card h-100 border-0 shadow-sm rounded-4 text-center w-100">
+          <img src="{{f.image.url}}" class="card-img-top" alt="{{f.name}}" style="height: 220px; object-fit: cover;">
+          <div class="card-body p-4 d-flex flex-column">
+            <h5 class="card-title fw-bold mb-3">{{f.name}}</h5>
+            <!-- Если у специализации есть свое описание, лучше использовать его.
+                 Пока используется описание лаборатории, как в вашем коде. -->
+            <p class="card-text text-secondary">{{lab.description|truncatewords:20|safe}}</p>
+            <div class="mt-auto pt-3">
+              {% if f.slug %}
+                <a href="{% url 'projects' lab.slug f.slug %}" class="btn btn-primary rounded-pill px-4">
+                  Проекты
+                </a>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+
+    <div class="row mt-5">
+      <div class="col-12 text-center">
+        <a href="{% url 'all_projects' lab.slug %}" class="btn btn-outline-primary btn-lg rounded-pill px-5 py-2">Все проекты этой лаборатории</a>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock main %}

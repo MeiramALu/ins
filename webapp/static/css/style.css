@@ -1,0 +1,46 @@
+.transition-shadow {
+    transition: box-shadow 0.3s ease-in-out;
+}
+.hover-shadow-lg:hover {
+    box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.175) !important;
+}
+
+.transition-transform {
+    transition: transform 0.3s ease-in-out;
+}
+
+/* Эффект подъема карточки */
+.hover-lift:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15) !important;
+}
+.hover-lift-sm:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Эффект фона для объявлений */
+.transition-background {
+    transition: background-color 0.3s ease-in-out;
+}
+.hover-bg-white:hover {
+    background-color: #ffffff !important;
+}
+
+/* Эффект прозрачности для логотипов партнеров */
+.transition-opacity {
+    transition: opacity 0.3s ease-in-out;
+}
+.hover-opacity-100:hover {
+    opacity: 1 !important;
+}
+
+/* Тень для текста на Hero */
+.text-shadow {
+    text-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+}
+
+/* Переопределение для ссылки в новостях */
+.hover-link-primary:hover {
+    color: var(--bs-primary) !important; /* Убедитесь, что --bs-primary определен */
+}
