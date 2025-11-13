@@ -43,7 +43,7 @@
             <p class="card-text text-secondary">{{lab.description|truncatewords:20|safe}}</p>
             <div class="mt-auto pt-3">
               {% if f.slug %}
-                <a href="{% url 'projects' lab.slug f.slug %}" class="btn btn-primary rounded-pill px-4">
+                <a href="{% url 'projects_by_field' lab_slug=lab.slug field_slug=f.slug %}" class="btn btn-primary rounded-pill px-4">
                   Проекты
                 </a>
               {% endif %}

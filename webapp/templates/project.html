@@ -1,17 +1,23 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block nav %}
-<!-- Hero Section for Project Detail Page -->
-<section class="bg-dark text-white position-relative overflow-hidden">
-  <!-- Фоновое изображение проекта с затемнением -->
-  <div class="position-absolute w-100 h-100 top-0 start-0" style="background: url('{{ project.image.url }}') no-repeat center center; background-size: cover; opacity: 0.3; z-index: 1;"></div>
+<section class="bg-dark text-white position-relative overflow-hidden pt-5 pb-4">
+  <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(rgba(13, 22, 46, 0.9), rgba(13, 22, 46, 0.7)); background-size: cover; filter: grayscale(80%);">
+    {% if project.main_image %}
+    <img src="{{ project.main_image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ project.name }}">
+    {% else %}
+    <div class="w-100 h-100" style="background-color: #0d162e;"></div>
+    {% endif %}
+  </div>
 
-  <div class="container position-relative" style="z-index: 2;">
-    <div class="row justify-content-center text-center py-5 py-lg-7">
-      <div class="col-lg-10 py-5">
-        <h1 class="display-3 fw-bolder mb-3">{{ project.name }}</h1>
-        <p class="fs-5 mb-0 text-light">{{project.description|safe}}</p>
+  <div class="container py-5 text-center position-relative" style="z-index: 2;">
+    <div class="row justify-content-center pt-5 pb-3">
+      <div class="col-lg-10 col-xl-8 pt-5 pb-3" data-aos="zoom-out">
+        <p class="fs-6 mb-2 text-primary text-uppercase fw-semibold text-shadow">{{ project.lab.name }} / {{ project.field.name }}</p>
+        <h1 class="display-3 fw-bolder mb-3 text-shadow">{{ project.name }}</h1>
+        <p class="fs-5 mb-0 text-light opacity-75 text-shadow">{{ project.description }}</p>
       </div>
     </div>
   </div>
@@ -19,79 +25,108 @@
 {% endblock nav %}
 
 {% block main %}
-<section class="py-5 py-xl-8 bg-light">
-  <div class="container mb-5">
-    <div class="row justify-content-md-center">
-      <div class="col-12 text-center">
-        <h3 class="fs-6 text-secondary mb-2 text-uppercase">Подробности проекта</h3>
-        <h2 class="display-5 fw-bold mb-0">{{ project.name }}</h2>
-      </div>
-    </div>
-  </div>
+<section class="py-5 py-xl-8 bg-white">
+    <div class="container">
+        <div class="row gy-5">
 
-  <div class="container">
-    <div class="row gy-5">
+            <div class="col-12 col-lg-8">
 
-      <!-- Левая колонка - Содержание проекта, PDF, Видео -->
-      <div class="col-12 col-lg-8">
-        <h3 class="fw-bold mb-4">Содержание проекта</h3>
-        <div class="mb-5 fs-5 text-dark lh-base">
-          {{ project.content|safe }}
-        </div>
+                {% if project.youtube_url %}
+                    <div class="ratio ratio-16x9 mb-4 shadow-lg rounded-4 overflow-hidden">
+                        <iframe src="https://www.youtube.com/embed/{{ project.youtube_url|cut:'https://www.youtube.com/watch?v='|cut:'https://youtu.be/' }}"
+                                title="YouTube video player" frameborder="0"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                allowfullscreen>
+                        </iframe>
+                    </div>
+                {% elif project.main_image %}
+                    <div class="mb-4 shadow-lg rounded-4 overflow-hidden">
+                        <img src="{{ project.main_image.url }}" class="img-fluid w-100 object-fit-cover" alt="{{ project.name }}">
+                    </div>
+                {% endif %}
 
-        {% if project.pdf_file %}
-          <h3 class="fw-bold mb-4 mt-5">Документ проекта</h3>
-          <div class="pdf-viewer mb-4 rounded-4 shadow-sm overflow-hidden" style="border: 1px solid #e2e8f0;">
-            <iframe src="{{ project.pdf_file.url }}" width="100%" height="800px" style="border: none;">
-              <p>Ваш браузер не поддерживает отображение PDF.
-                <a href="{{ project.pdf_file.url }}">Скачайте его по этой ссылке.</a>
-              </p>
-            </iframe>
-          </div>
-        {% endif %}
+                <article class="project-content mt-5">
+                    <h2 class="fw-bolder mb-3">{% trans "Обзор проекта" %}</h2>
+                    {% if project.content %}
+                        {{ project.content|safe }}
+                    {% else %}
+                        <p class="text-secondary">{% trans "Полное описание проекта будет добавлено позднее." %}</p>
+                    {% endif %}
+                </article>
 
-        {% if project.youtube_url %}
-          {% with youtube_id=project.youtube_url|cut:"https://youtu.be/"|cut:"https://www.youtube.com/watch?v=" %}
-            <h3 class="fw-bold mb-4 mt-5">Видео о проекте</h3>
-            <div class="ratio ratio-16x9 mb-4 rounded-4 shadow-sm overflow-hidden">
-              <iframe src="https://www.youtube.com/embed/{{ youtube_id }}"
-                      title="YouTube video player"
-                      frameborder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                      allowfullscreen>
-              </iframe>
+                {% if project.pdf_file %}
+                    <div class="alert alert-info mt-5 d-flex align-items-center rounded-pill shadow-sm transition-transform hover-lift-sm" role="alert">
+                        <i class="bi bi-file-earmark-pdf-fill me-3 fs-3"></i>
+                        <div>
+                            {% trans "Документ проекта доступен для скачивания." %}
+                        </div>
+                        <a href="{{ project.pdf_file.url }}" target="_blank" class="btn btn-sm btn-primary rounded-pill ms-auto">
+                            {% trans "Скачать PDF" %} <i class="bi bi-download"></i>
+                        </a>
+                    </div>
+                {% endif %}
+
             </div>
-          {% endwith %}
-        {% endif %}
-      </div>
 
-      <!-- Правая колонка - Информация о проекте -->
-      <div class="col-12 col-lg-4">
-        <div class="card shadow-lg sticky-top rounded-4" style="top: 100px;">
-          <div class="card-body p-4">
-            <h5 class="card-title fw-bold mb-4">Информация о проекте</h5>
-            <ul class="list-unstyled mb-4">
-              <li class="mb-2 fs-6">
-                <i class="bi bi-calendar-event me-2 text-primary"></i> <strong>Дата:</strong> {{ project.date|date:"d.m.Y" }}
-              </li>
-              <li class="mb-2 fs-6">
-                <i class="bi bi-building me-2 text-primary"></i> <strong>Лаборатория:</strong> <a href="{% url 'lab' project.lab.slug %}" class="link-dark text-decoration-none">{{ project.lab.name }}</a>
-              </li>
-              <li class="mb-3 fs-6">
-                <i class="bi bi-journal-text me-2 text-primary"></i> <strong>Направление:</strong> <a href="{% url 'projects' project.lab.slug project.field.slug %}" class="link-dark text-decoration-none">{{ project.field.name }}</a>
-              </li>
-            </ul>
+            <div class="col-12 col-lg-4">
+                <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top" style="top: 20px;">
+                    <h4 class="fw-bolder mb-4">{% trans "Ключевые детали" %}</h4>
 
-            {% if project.pdf_file %}
-              <a href="{{ project.pdf_file.url }}" download class="btn btn-primary w-100 rounded-pill py-2 mt-3">
-                <i class="bi bi-file-earmark-arrow-down me-2"></i> Скачать PDF
-              </a>
-            {% endif %}
-          </div>
+                    <ul class="list-unstyled mb-0">
+                        <li class="mb-3 d-flex justify-content-between">
+                            <span class="fw-semibold">{% trans "Лаборатория:" %}</span>
+                            <span class="text-primary fw-bold">{{ project.lab.name }}</span>
+                        </li>
+                        <li class="mb-3 d-flex justify-content-between">
+                            <span class="fw-semibold">{% trans "Направление:" %}</span>
+                            <span class="text-secondary">{{ project.field.name }}</span>
+                        </li>
+                        <li class="mb-3 d-flex justify-content-between">
+                            <span class="fw-semibold">{% trans "Заказчик:" %}</span>
+                            <span class="text-secondary">{{ project.client_name|default:"-" }}</span>
+                        </li>
+                        <li class="mb-3 d-flex justify-content-between">
+                            <span class="fw-semibold">{% trans "Год завершения:" %}</span>
+                            <span class="text-secondary">{{ project.year_completed|default:"-" }}</span>
+                        </li>
+                        <li class="mb-3 d-flex justify-content-between">
+                            <span class="fw-semibold">{% trans "Технологии:" %}</span>
+                            <span class="text-secondary text-end">{{ project.technologies|default:"-" }}</span>
+                        </li>
+                    </ul>
+
+                    {% if project.project_url %}
+                        <div class="mt-4 pt-3 border-top">
+                            <a href="{{ project.project_url }}" target="_blank" class="btn btn-primary btn-lg w-100 rounded-pill transition-transform hover-lift">
+                                {% trans "Посмотреть проект" %} <i class="bi bi-arrow-up-right-square"></i>
+                            </a>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+
         </div>
-      </div>
-
     </div>
-  </div>
 </section>
+
+{% if related_projects %}
+<section class="py-5 py-xl-8 bg-light">
+    <div class="container">
+        <h2 class="fw-bolder mb-4">{% trans "Похожие проекты" %}</h2>
+        <div class="row gy-4 gx-4">
+            {% for rp in related_projects %}
+            <div class="col-12 col-md-6">
+                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-transform hover-lift-sm">
+                    <div class="card-body">
+                        <h5 class="fw-bold">{{ rp.name }}</h5>
+                        <p class="text-secondary small mb-0">{{ rp.description|truncatewords:15 }}</p>
+                        <a href="{{ rp.get_absolute_url }}" class="small fw-semibold link-primary mt-2 d-inline-block">{% trans "Подробнее" %}</a>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endif %}
 {% endblock main %}

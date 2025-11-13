@@ -1,16 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
+{% load i18n %}
 
 {% block nav %}
-<!-- Hero Section for Laboratories Page -->
-<section class="bg-dark text-white position-relative">
-  <div class="position-absolute w-100 h-100" style="background: url('{% static "assets/img/hero/service-img-1.webp" %}') no-repeat center center; background-size: cover; opacity: 0.3;"></div>
+<section class="text-white position-relative overflow-hidden pt-5 pb-4" style="background-color: #0d162e;">
+  <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(rgba(13, 22, 46, 0.95), rgba(13, 22, 46, 0.8)), url('{% static "assets/img/hero/lab-list-img.webp" %}') no-repeat center center; background-size: cover; filter: grayscale(80%);"></div>
 
-  <div class="container position-relative" style="z-index: 2;">
-    <div class="row justify-content-center text-center py-5">
-      <div class="col-lg-8 py-5">
-        <h1 class="display-3 fw-bolder mb-3">Наши лаборатории</h1>
-        <p class="fs-5 mb-0 text-light">Мы обеспечиваем более персонализированный опыт, адаптированный к уникальным потребностям каждого клиента.</p>
+  <div class="container position-relative py-5" style="z-index: 2;">
+    <div class="row justify-content-center text-center pt-5 pb-5">
+      <div class="col-lg-10 col-xl-8 pt-5 pb-3" data-aos="zoom-out">
+        <h1 class="display-2 fw-bolder mb-3 text-shadow">{% trans "Наши лаборатории" %}</h1>
+        <p class="fs-5 mb-0 text-light opacity-75 text-shadow">{% trans "Исследуйте наши специализированные направления и команды, которые движут инновациями." %}</p>
       </div>
     </div>
   </div>
@@ -18,13 +18,12 @@
 {% endblock nav %}
 
 {% block main %}
-<!-- Laboratories Grid Section -->
-<section class="py-5 py-xl-8 bg-light">
+<section class="py-5 py-xl-8 bg-white">
   <div class="container mb-5">
-    <div class="row justify-content-md-center">
+    <div class="row justify-content-md-center" data-aos="fade-down">
       <div class="col-12 text-center">
-        <h3 class="fs-6 text-secondary mb-2 text-uppercase">Чем мы занимаемся</h3>
-        <h2 class="display-5 fw-bold mb-0">Список наших специализированных лабораторий</h2>
+        <h3 class="fs-6 text-uppercase text-primary mb-2 fw-semibold">{% trans "Структура" %}</h3>
+        <h2 class="display-5 fw-bold mb-0">{% trans "Список наших специализированных лабораторий" %}</h2>
       </div>
     </div>
   </div>
@@ -32,32 +31,31 @@
   <div class="container overflow-hidden">
     <div class="row gy-4 gx-4 justify-content-center">
       {% for lab in labs %}
-      <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch">
-        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden w-100">
-          <a href="{% url 'lab' lab.slug %}" class="text-decoration-none">
+      {% with forloop.counter0 as index %}
+          {% if index == 0 %}
+              {% with 0 as delay %}{% endwith %}
+          {% elif index == 1 %}
+              {% with 150 as delay %}{% endwith %}
+          {% elif index == 2 %}
+              {% with 300 as delay %}{% endwith %}
+          {% else %}
+              {% with 450 as delay %}{% endwith %}
+          {% endif %}
+      {% endwith %}
+      <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="{{ delay }}">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden w-100 transition-transform hover-lift">
+          <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="text-decoration-none">
             <figure class="m-0">
-              <!-- Предполагается, что у модели Lab есть поле image -->
-              <img class="img-fluid bsb-scale bsb-hover-scale-up" loading="lazy" src="{{ lab.image.url }}" alt="{{ lab.name }}" style="height: 220px; width: 100%; object-fit: cover;">
+              <img class="img-fluid bsb-scale bsb-hover-scale-up" loading="lazy" src="{% if lab.image %}{{ lab.image.url }}{% else %}https://placehold.co/600x400/0f172a/ffffff?text={{ lab.name|urlencode }}{% endif %}" alt="{{ lab.name }}" style="height: 220px; width: 100%; object-fit: cover;">
             </figure>
           </a>
           <div class="card-body p-4 d-flex flex-column">
-            <h5 class="card-title fw-bold mb-3">
-                <a href="{% url 'lab' lab.slug %}" class="link-dark text-decoration-none">{{ lab.name }}</a>
+            <h5 class="card-title fw-bolder mb-3">
+                <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="link-dark text-decoration-none hover-link-primary">{{ lab.name }}</a>
             </h5>
-            <p class="card-text text-secondary mb-4 flex-grow-1">
-                {{ lab.description|truncatewords:20|safe }}
-            </p>
-            <div class="mt-auto">
-                <a href="{% url 'lab' lab.slug %}" class="btn btn-primary rounded-pill px-4">Подробнее</a>
-            </div>
+            <p class="card-text text-secondary mb-4 flex-grow-1">{{ lab.description|truncatewords:20 }}</p>
+            <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="btn btn-sm btn-outline-primary rounded-pill">{% trans "Перейти к лаборатории" %}</a>
           </div>
-        </div>
-      </div>
-      {% empty %}
-      <div class="col-12">
-        <div class="alert alert-info text-center" role="alert">
-          <h4 class="alert-heading">Лаборатории не найдены</h4>
-          <p>В данный момент информация о лабораториях не доступна. Пожалуйста, зайдите позже.</p>
         </div>
       </div>
       {% endfor %}

@@ -1,17 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
-
+{% load i18n %}
 
 {% block nav %}
-<!-- Hero Section -->
 <section class="bg-dark text-white" style="background: url('{% static "assets/img/hero/hero-img-1.webp" %}') no-repeat center center; background-size: cover;">
-  <div class="container-fluid" style="background-color: rgba(13, 22, 46, 0.7);">
+  <div class="container-fluid" style="background-color: rgba(13, 22, 46, 0.85);">
     <div class="container py-5 text-center">
         <div class="row justify-content-center py-5">
-            <div class="col-lg-8 col-md-10 py-5">
-                <h1 class="display-3 fw-bolder mb-4">Мы предлагаем современные IT решения</h1>
-                <p class="fs-5 mb-5 text-light">Мы работаем индивидуально, разрабатывая и реализуя полностью онлайн-проекты в рамках долгосрочного партнерства.</p>
-                <a href="{% url 'how' %}" role="button" class="btn btn-primary btn-lg rounded-pill px-4 py-2">Подробнее</a>
+            <div class="col-lg-10 col-md-11 py-5">
+                <h1 class="display-3 fw-bolder mb-4 text-shadow">{{ settings.hero_title_home }}</h1>
+                <p class="fs-5 mb-5 text-light text-shadow">{{ settings.hero_subtitle_home }}</p>
+                <a href="{% url 'how' %}" role="button" class="btn btn-primary btn-lg rounded-pill px-5 py-3 fw-bold transition-transform hover-lift">{% trans "Подробнее" %}</a>
             </div>
         </div>
     </div>
@@ -20,28 +19,35 @@
 {% endblock nav %}
 
 {% block main %}
-<!-- About Institute Section -->
 <section class="py-5 py-xl-8">
   <div class="container">
     <div class="row justify-content-md-center">
       <div class="col-12 text-center mb-5">
-        <h3 class="fs-6 text-secondary mb-2 text-uppercase">О нас</h3>
-        <h2 class="display-5 fw-bold">Об институте</h2>
+        <h3 class="fs-6 text-primary mb-2 text-uppercase">{% trans "О нас" %}</h3>
+        <h2 class="display-5 fw-bolder">{% trans "Об институте" %}</h2>
       </div>
     </div>
     <div class="row gy-4 align-items-center">
       <div class="col-12 col-lg-7">
-        <div class="card border-0 shadow-lg rounded-4">
+        <div class="card border-0 shadow-lg rounded-4 transition-shadow hover-shadow-lg transition-transform hover-lift-sm">
           <div class="row g-0">
             <div class="col-md-5">
-              <!-- Замените это изображение на актуальное -->
-              <img src="https://placehold.co/400x500/334155/ffffff?text=Фото\nИнститута" class="img-fluid rounded-start-4 w-100 h-100 object-fit-cover" alt="About the Institute">
+              {% if settings.about_image %}
+                <img src="{{ settings.about_image.url }}"
+                     class="img-fluid rounded-start-4 w-100 h-100 object-fit-cover"
+                     alt="Фото Института">
+              {% else %}
+                <div class="p-5 w-100 h-100 d-flex align-items-center justify-content-center text-white rounded-start-4" style="background-color: #0f172a;">
+                    Фото<br>Института
+                </div>
+              {% endif %}
             </div>
             <div class="col-md-7 d-flex flex-column p-4">
               <div class="card-body">
-                <h3 class="card-title fw-bold">Кто мы такие?</h3>
-                <p class="card-text text-secondary mt-3">Мы помогаем людям создавать невероятные бренды и превосходные продукты. Наша цель – предоставлять выдающиеся и увлекательные услуги. Мы создаем цифровой метод, который поддерживает жизнь во всех средах.</p>
-                <p class="card-text text-secondary">Мы верим в инновации, объединяя первичные и сложные идеи для достижения наилучших результатов.</p>
+                <h3 class="card-title fw-bold">{% trans "Кто мы такие?" %}</h3>
+                <div class="card-text text-secondary mt-3">
+                    {{ settings.about_text_intro|safe }}
+                </div>
               </div>
             </div>
           </div>
@@ -49,49 +55,29 @@
       </div>
       <div class="col-12 col-lg-5">
         <div class="d-flex flex-column gap-4">
-          <div class="d-flex align-items-start p-3 bg-light rounded-4">
-            <div class="me-3 text-primary fs-3">
-              <!-- Иконка миссии -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-bullseye" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M8 13A5 5 0 1 1 8 3a5 5 0 0 1 0 10m0 1A6 6 0 1 0 8 2a6 6 0 0 0 0 12"/><path d="M8 11a3 3 0 1 1 0-6 3 3 0 0 1 0 6m0 1a4 4 0 1 0 0-8 4 4 0 0 0 0 8"/><path d="M9.5 8a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/></svg>
+          {% for item in mission_items %}
+          <div class="d-flex align-items-start p-4 border rounded-4 transition-background hover-bg-white">
+            <div class="me-4 text-primary fs-3">
+              <i class="bi {{ item.icon_class }}"></i>
             </div>
             <div>
-              <h5 class="fw-bold mb-1">Наша миссия</h5>
-              <p class="text-secondary mb-0">Описание миссии института. Создание инновационных решений.</p>
+              <h5 class="fw-bolder mb-1 text-dark">{{ item.name }}</h5>
+              <p class="text-secondary mb-0">{{ item.description }}</p>
             </div>
           </div>
-          <div class="d-flex align-items-start p-3 bg-light rounded-4">
-            <div class="me-3 text-primary fs-3">
-              <!-- Иконка целей -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-check-circle" viewBox="0 0 16 16"><path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14m0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16"/><path d="M10.97 4.97a.235.235 0 0 0-.02.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-1.071-1.05"/></svg>
-            </div>
-            <div>
-              <h5 class="fw-bold mb-1">Наши цели</h5>
-              <p class="text-secondary mb-0">Краткое описание ключевых целей и задач.</p>
-            </div>
-          </div>
-          <div class="d-flex align-items-start p-3 bg-light rounded-4">
-            <div class="me-3 text-primary fs-3">
-               <!-- Иконка стратегии -->
-              <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" fill="currentColor" class="bi bi-compass" viewBox="0 0 16 16"><path d="M8 16.016a7.5 7.5 0 0 0 1.962-14.74A1 1 0 0 0 9 0H7a1 1 0 0 0-.962 1.276A7.5 7.5 0 0 0 8 16.016m6.5-7.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0"/><path d="m6.94 7.44 4.95-2.83-2.83 4.95-4.949 2.83 2.828-4.95z"/></svg>
-            </div>
-            <div>
-              <h5 class="fw-bold mb-1">Наша стратегия</h5>
-              <p class="text-secondary mb-0">Описание стратегического видения и подходов.</p>
-            </div>
-          </div>
+          {% endfor %}
         </div>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Labs Section -->
 <section class="py-5 py-xl-8 bg-light">
   <div class="container mb-5">
     <div class="row justify-content-md-center">
       <div class="col-12 text-center">
-        <h3 class="fs-6 text-secondary mb-2 text-uppercase">Чем мы занимаемся</h3>
-        <h2 class="display-5 fw-bold mb-0">Наши специализированные лаборатории</h2>
+        <h3 class="fs-6 text-primary mb-2 text-uppercase">{% trans "Чем мы занимаемся" %}</h3>
+        <h2 class="display-5 fw-bolder mb-0">{% trans "Наши научные проекты" %}</h2>
       </div>
     </div>
   </div>
@@ -100,19 +86,17 @@
     <div class="row gy-4 gx-4 justify-content-center">
       {% for lab in labs %}
       <div class="col-12 col-md-6 col-lg-4">
-        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bsb-overlay-hover">
-          <a href="{% url 'lab' lab.slug %}" class="text-decoration-none">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden bsb-overlay-hover transition-transform hover-lift">
+          <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="text-decoration-none">
             <figure class="m-0">
-              <!-- Вам нужно будет добавить поле image в модель Lab -->
-              <!-- <img class="img-fluid bsb-scale bsb-hover-scale-up" loading="lazy" src="{{lab.image.url}}" alt="{{lab.name}}"> -->
-              <img class="img-fluid bsb-scale bsb-hover-scale-up" loading="lazy" src="https://placehold.co/600x400/334155/ffffff?text={{ lab.name|urlencode }}" alt="{{lab.name}}">
+              <img class="img-fluid bsb-scale bsb-hover-scale-up" loading="lazy" src="{% if lab.image %}{{ lab.image.url }}{% else %}https://placehold.co/600x400/0f172a/ffffff?text={{ lab.name|urlencode }}{% endif %}" alt="{{lab.name}}">
             </figure>
           </a>
           <div class="card-body border-top border-4 border-primary text-center p-4">
             <h4 class="fw-bold mb-3">{{lab.name}}</h4>
             <p class="mb-3 text-secondary">{{lab.description|truncatewords:20|safe}}</p>
-            <a href="{% url 'lab' lab.slug %}" class="fw-bold text-decoration-none link-primary">
-              Подробнее
+            <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="fw-bold text-decoration-none link-secondary hover-link-primary">
+              {% trans "Подробнее" %}
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
                 <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z" />
               </svg>
@@ -125,127 +109,87 @@
   </div>
 </section>
 
-<!-- News & Announcements Section -->
 <section class="py-5 py-xl-8">
   <div class="container">
       <div class="row justify-content-md-center">
           <div class="col-12 text-center mb-5">
-            <h3 class="fs-6 text-secondary mb-2 text-uppercase">События</h3>
-            <h2 class="display-5 fw-bold">Новости и объявления</h2>
+            <h3 class="fs-6 text-primary mb-2 text-uppercase">{% trans "События" %}</h3>
+            <h2 class="display-5 fw-bolder">{% trans "Новости и объявления" %}</h2>
           </div>
       </div>
       <div class="row gy-4">
-          <!-- Last News Column -->
           <div class="col-12 col-lg-8">
-              <h3 class="mb-4 fw-bold">Последние новости</h3>
-              <!-- Вам нужно будет передавать новости из view -->
+              <h3 class="mb-4 fw-bold">{% trans "Последние новости" %}</h3>
               <div class="vstack gap-4">
-                  <div class="card border-0 shadow-sm rounded-4">
+                  {% for news in latest_news %}
+                  <div class="card border-0 shadow-sm rounded-4 transition-shadow hover-shadow-lg transition-transform hover-lift-sm">
                       <div class="row g-0">
                           <div class="col-md-4">
-                              <img src="https://placehold.co/600x400/64748b/ffffff?text=Новость+1" class="img-fluid rounded-start-4 w-100 h-100 object-fit-cover" alt="News 1">
+                              <img src="{% if news.image %}{{ news.image.url }}{% else %}https://placehold.co/600x400/334155/ffffff?text={% trans "Новость" %}{% endif %}" class="img-fluid rounded-start-4 w-100 h-100 object-fit-cover" alt="{{ news.title }}">
                           </div>
                           <div class="col-md-8">
                               <div class="card-body">
-                                  <p class="text-muted small mb-1">17 Октября, 2025</p>
-                                  <h5 class="card-title fw-bold"><a href="#" class="text-dark text-decoration-none">Заголовок важной новости о последнем достижении</a></h5>
-                                  <p class="card-text text-secondary">Краткое описание новости. Здесь будет текст, который заинтересует читателя и заставит его перейти по ссылке...</p>
+                                  <p class="text-primary small mb-1 fw-bold">{{ news.publish_date|date:"d F, Y" }}</p>
+                                  <h5 class="card-title fw-bolder"><a href="{% url 'news_detail' news_slug=news.slug %}" class="text-dark text-decoration-none hover-link-primary">{{ news.title }}</a></h5>
+                                  <p class="card-text text-secondary">{{ news.excerpt|default:news.content|striptags|truncatewords:20 }}</p>
                               </div>
                           </div>
                       </div>
                   </div>
-                  <div class="card border-0 shadow-sm rounded-4">
-                      <div class="row g-0">
-                          <div class="col-md-4">
-                              <img src="https://placehold.co/600x400/64748b/ffffff?text=Новость+2" class="img-fluid rounded-start-4 w-100 h-100 object-fit-cover" alt="News 2">
-                          </div>
-                          <div class="col-md-8">
-                              <div class="card-body">
-                                  <p class="text-muted small mb-1">15 Октября, 2025</p>
-                                  <h5 class="card-title fw-bold"><a href="#" class="text-dark text-decoration-none">Еще одна новость о конференции или мероприятии</a></h5>
-                                  <p class="card-text text-secondary">Краткое описание новости. Здесь будет текст, который заинтересует читателя и заставит его перейти по ссылке...</p>
-                              </div>
-                          </div>
-                      </div>
-                  </div>
+                  {% empty %}
+                  <p>{% trans "Пока нет опубликованных новостей." %}</p>
+                  {% endfor %}
               </div>
           </div>
 
-          <!-- Announcements Column -->
           <div class="col-12 col-lg-4">
-              <div class="p-4 rounded-4 bg-light h-100">
-                  <h3 class="mb-4 fw-bold">Объявления</h3>
-                  <!-- Вам нужно будет передавать объявления из view -->
+              <div class="p-4 rounded-4 bg-light h-100 border border-primary border-4 transition-shadow hover-shadow-lg">
+                  <h3 class="mb-4 fw-bold">{% trans "Объявления" %}</h3>
                   <div class="vstack gap-3">
-                      <div class="d-flex">
-                          <div class="me-3">
+                      {% for ann in latest_announcements %}
+                      <div class="d-flex p-2 rounded-3 transition-background hover-bg-white">
+                          <div class="me-3 flex-shrink-0">
                               <div class="d-flex flex-column text-center bg-primary text-white rounded-3 px-3 py-2">
-                                  <span class="fw-bold fs-5">25</span>
-                                  <small>Окт</small>
+                                  <span class="fw-bolder fs-5">{{ ann.event_date|date:"d" }}</span>
+                                  <small>{{ ann.event_date|date:"M" }}</small>
                               </div>
                           </div>
-                          <div>
-                              <a href="#" class="text-dark fw-bold text-decoration-none">Объявление о предстоящем вебинаре</a>
+                          <div class="align-self-center">
+                              <a href="#" class="text-dark fw-bold text-decoration-none hover-link-primary">{{ ann.title }}</a>
                           </div>
                       </div>
-                      <hr class="my-1">
-                      <div class="d-flex">
-                          <div class="me-3">
-                              <div class="d-flex flex-column text-center bg-primary text-white rounded-3 px-3 py-2">
-                                  <span class="fw-bold fs-5">10</span>
-                                  <small>Ноя</small>
-                              </div>
-                          </div>
-                          <div>
-                              <a href="#" class="text-dark fw-bold text-decoration-none">Напоминание о подаче заявок на грант</a>
-                          </div>
-                      </div>
-                      <hr class="my-1">
-                      <div class="d-flex">
-                          <div class="me-3">
-                              <div class="d-flex flex-column text-center bg-primary text-white rounded-3 px-3 py-2">
-                                  <span class="fw-bold fs-5">01</span>
-                                  <small>Дек</small>
-                              </div>
-                          </div>
-                          <div>
-                              <a href="#" class="text-dark fw-bold text-decoration-none">Приглашение на новогодний корпоратив</a>
-                          </div>
-                      </div>
+                      {% if not forloop.last %}<hr class="my-1">{% endif %}
+                      {% empty %}
+                      <p class="text-secondary small">{% trans "Объявления отсутствуют." %}</p>
+                      {% endfor %}
                   </div>
               </div>
           </div>
       </div>
   </div>
 </section>
-  <section class="py-5 bg-light">
+
+<section class="py-5 bg-light border-top border-secondary border-opacity-10">
     <div class="container">
       <div class="row justify-content-center text-center">
-        <div class="col-12 mb-4">
-          <h2 class="fw-bold">Наши партнеры</h2>
+        <div class="col-12 mb-5">
+          <h2 class="fw-bolder">{% trans "Наши партнеры" %}</h2>
         </div>
         <div class="col-lg-10">
           <div class="row align-items-center justify-content-center gy-4">
-            <!-- Замените # на ссылки и src на логотипы ваших партнеров -->
+            {% for partner in partners %}
             <div class="col-6 col-sm-4 col-md-2">
-              <a href="#"><img src="https://placehold.co/150x75/e2e8f0/64748b?text=Партнер+1" class="img-fluid" alt="Partner 1"></a>
+              <a href="{{ partner.website_url|default:'#' }}" target="_blank">
+                <img src="{% if partner.logo %}{{ partner.logo.url }}{% else %}https://placehold.co/150x75/e2e8f0/64748b?text={{ partner.name|urlencode }}{% endif %}" class="img-fluid transition-opacity opacity-75 hover-opacity-100" alt="{{ partner.name }}">
+              </a>
             </div>
-            <div class="col-6 col-sm-4 col-md-2">
-              <a href="#"><img src="https://placehold.co/150x75/e2e8f0/64748b?text=Партнер+2" class="img-fluid" alt="Partner 2"></a>
-            </div>
-            <div class="col-6 col-sm-4 col-md-2">
-              <a href="#"><img src="https://placehold.co/150x75/e2e8f0/64748b?text=Партнер+3" class="img-fluid" alt="Partner 3"></a>
-            </div>
-            <div class="col-6 col-sm-4 col-md-2">
-              <a href="#"><img src="https://placehold.co/150x75/e2e8f0/64748b?text=Партнер+4" class="img-fluid" alt="Partner 4"></a>
-            </div>
-            <div class="col-6 col-sm-4 col-md-2">
-              <a href="#"><img src="https://placehold.co/150x75/e2e8f0/64748b?text=Партнер+5" class="img-fluid" alt="Partner 5"></a>
-            </div>
+            {% empty %}
+            <p>{% trans "Список партнеров пуст." %}</p>
+            {% endfor %}
           </div>
         </div>
       </div>
     </div>
-  </section>
+</section>
 
 {% endblock main %}

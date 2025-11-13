@@ -2,15 +2,14 @@
 {% load static %}
 
 {% block nav %}
-<!-- Hero Section for Contacts Page -->
 <section class="bg-dark text-white position-relative">
-  <div class="position-absolute w-100 h-100" style="background: url('{% static "assets/img/hero/contact-img-1.webp" %}') no-repeat center center; background-size: cover; opacity: 0.3;"></div>
+  <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(rgba(13, 22, 46, 0.9), rgba(13, 22, 46, 0.7)), url('{% static "assets/img/hero/contact-img-1.webp" %}') no-repeat center center; background-size: cover; filter: grayscale(80%);"></div>
 
-  <div class="container position-relative" style="z-index: 2;">
-    <div class="row justify-content-center text-center py-5">
-      <div class="col-lg-8 py-5">
-        <h1 class="display-3 fw-bolder mb-3">Наши контакты</h1>
-        <p class="fs-5 mb-0 text-light">Общение — ключ к успеху, и мы всегда здесь, чтобы ответить на ваши вопросы.</p>
+  <div class="container position-relative py-5" style="z-index: 2;">
+    <div class="row justify-content-center text-center pt-5 pb-5">
+      <div class="col-lg-8 pt-3 pb-3">
+        <h1 class="display-2 fw-bolder mb-3 text-shadow">Наши контакты</h1>
+        <p class="fs-5 mb-0 text-light text-shadow">Общение — ключ к успеху, и мы всегда здесь, чтобы ответить на ваши вопросы.</p>
       </div>
     </div>
   </div>
@@ -18,13 +17,12 @@
 {% endblock nav %}
 
 {% block main %}
-<!-- Contact Section -->
 <section class="py-5 py-xl-8 bg-light">
     <div class="container mb-5">
         <div class="row justify-content-md-center">
             <div class="col-12 text-center">
-                <h3 class="fs-6 text-secondary mb-2 text-uppercase">Свяжитесь с нами</h3>
-                <h2 class="display-5 fw-bold mb-0">Мы всегда рады помочь</h2>
+                <h3 class="fs-6 text-primary mb-2 text-uppercase fw-semibold">Свяжитесь с нами</h3>
+                <h2 class="display-5 fw-bolder mb-0">Мы всегда рады помочь</h2>
             </div>
         </div>
     </div>
@@ -32,71 +30,71 @@
     <div class="container">
         <div class="row gy-4 gy-md-5 gy-lg-0 align-items-lg-start">
 
-            <!-- Левая колонка - Контактная информация и карта -->
             <div class="col-12 col-lg-5">
-                <div class="card border-0 shadow-sm rounded-4 p-4 mb-4">
-                    <h4 class="fw-bold mb-4">Контактная информация</h4>
-                    <div class="d-flex align-items-start mb-3">
-                        <i class="bi bi-geo-alt-fill fs-4 text-primary me-3"></i>
+                <div class="card border-0 shadow-lg rounded-4 p-4 mb-4 transition-transform hover-lift-sm">
+                    <h4 class="fw-bolder mb-4">Контактная информация</h4>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <i class="bi bi-geo-alt-fill fs-3 text-primary me-3"></i>
                         <div>
-                            <h6 class="fw-semibold">Адрес</h6>
+                            <h6 class="fw-semibold text-dark">Адрес</h6>
                             <p class="text-secondary mb-0">проспект аль-Фараби 71, Алматы, Казахстан</p>
                         </div>
                     </div>
-                    <div class="d-flex align-items-start mb-3">
-                        <i class="bi bi-telephone-fill fs-4 text-primary me-3"></i>
+
+                    <div class="d-flex align-items-start mb-4">
+                        <i class="bi bi-telephone-fill fs-3 text-primary me-3"></i>
                         <div>
-                            <h6 class="fw-semibold">Телефон</h6>
+                            <h6 class="fw-semibold text-dark">Телефон</h6>
                             <p class="text-secondary mb-0">+7 706 409 17 45</p>
                         </div>
                     </div>
+
                     <div class="d-flex align-items-start">
-                        <i class="bi bi-envelope-fill fs-4 text-primary me-3"></i>
+                        <i class="bi bi-envelope-fill fs-3 text-primary me-3"></i>
                         <div>
-                            <h6 class="fw-semibold">Электронная почта</h6>
-                            <p class="text-secondary mb-0">reanmor202@gmail.com</p>
+                            <h6 class="fw-semibold text-dark">Электронная почта</h6>
+                            <a href="mailto:reanmor202@gmail.com" class="text-secondary text-decoration-none hover-link-primary">reanmor202@gmail.com</a>
                         </div>
                     </div>
                 </div>
 
-                <div class="card border-0 shadow-sm rounded-4 overflow-hidden">
+                <div class="card border-0 shadow-lg rounded-4 overflow-hidden transition-shadow hover-shadow-lg">
                     <div class="ratio ratio-4x3">
-                        <!-- Карта. Замените src на нужную вам карту Google или Яндекс -->
-                        <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2906.77292261688!2d76.9079486154332!3d43.23517407913753!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3883692f027581ad%3A0x2426740f5641720!2sAl-Farabi%20Kazakh%20National%20University!5e0!3m2!1sen!2skz!4v1678886562645!5m2!1sen!2skz" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                        <iframe src="https://maps.google.com/maps?q=проспект+аль-Фараби+71,+Алматы&t=&z=13&ie=UTF8&iwloc=&output=embed" width="100%" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
                     </div>
                 </div>
             </div>
 
-            <!-- Правая колонка - Форма обратной связи -->
             <div class="col-12 col-lg-7">
-                <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5">
-                    <h4 class="fw-bold mb-4">Форма обратной связи</h4>
+                <div class="card border-0 shadow-lg rounded-4 p-4 p-md-5 transition-transform hover-lift">
+                    <h4 class="fw-bolder mb-4">Форма обратной связи</h4>
                     <form action="{% url 'contact_form' %}" method="POST">
                         {% csrf_token %}
                         <div class="row gy-4">
                             <div class="col-12">
-                                <label for="fullname" class="form-label">Полное имя <span class="text-danger">*</span></label>
+                                <label for="fullname" class="form-label fw-semibold">Полное имя <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="fullname" name="fullname" required>
                             </div>
                             <div class="col-12 col-md-6">
-                                <label for="email" class="form-label">Электронная почта <span class="text-danger">*</span></label>
+                                <label for="email" class="form-label fw-semibold">Электронная почта <span class="text-danger">*</span></label>
                                 <input type="email" class="form-control" id="email" name="email" required>
                             </div>
                             <div class="col-12 col-md-6">
-                                <label for="phone" class="form-label">Номер телефона</label>
+                                <label for="phone" class="form-label fw-semibold">Номер телефона</label>
                                 <input type="tel" class="form-control" id="phone" name="phone">
                             </div>
                             <div class="col-12">
-                                <label for="subject" class="form-label">Тема <span class="text-danger">*</span></label>
+                                <label for="subject" class="form-label fw-semibold">Тема <span class="text-danger">*</span></label>
                                 <input type="text" class="form-control" id="subject" name="subject" required>
                             </div>
                             <div class="col-12">
-                                <label for="message" class="form-label">Сообщение <span class="text-danger">*</span></label>
+                                <label for="message" class="form-label fw-semibold">Сообщение <span class="text-danger">*</span></label>
                                 <textarea class="form-control" id="message" name="message" rows="5" required></textarea>
                             </div>
                             <div class="col-12">
                                 <div class="d-grid">
-                                    <button class="btn btn-primary btn-lg rounded-pill" type="submit">Отправить сообщение</button>
+                                    <button class="btn btn-primary btn-lg rounded-pill fw-bold transition-transform hover-lift" type="submit">Отправить сообщение</button>
                                 </div>
                             </div>
                         </div>
