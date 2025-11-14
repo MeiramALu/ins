@@ -1,0 +1,85 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block nav %}
+<section class="bg-dark text-white position-relative overflow-hidden pt-5 pb-4">
+  <div class="position-absolute w-100 h-100 top-0 start-0"
+       style="background: linear-gradient(rgba(13, 22, 46, 0.9), rgba(13, 22, 46, 0.7)), url('{% if settings.hero_image_all_projects %}{{ settings.hero_image_all_projects.url }}{% else %}{% static "assets/img/hero/project-detail-img.webp" %}{% endif %}') no-repeat center center; background-size: cover; filter: grayscale(80%);">
+  </div>
+
+  <div class="container position-relative py-5" style="z-index: 2;">
+    <div class="row justify-content-center text-center pt-5 pb-5">
+      <div class="col-lg-10 col-xl-8 pt-5 pb-3" data-aos="zoom-in">
+        <h1 class="display-3 fw-bolder mb-3 text-shadow">{% trans "Наше Портфолио" %}</h1>
+        <p class="fs-5 mb-0 text-light opacity-75 text-shadow">{% trans "Полный список всех научных и коммерческих проектов института." %}</p>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock nav %}
+
+{% block main %}
+<section class="py-5 py-xl-8 bg-light">
+  <div class="container mb-5">
+    <div class="row justify-content-md-center">
+      <div class="col-12 text-center">
+        <h2 class="display-5 fw-bolder mb-0">{% trans "Все реализованные проекты" %}</h2>
+      </div>
+    </div>
+  </div>
+
+  <div class="container overflow-hidden">
+    <div class="row gy-4 gx-4 justify-content-center">
+      {% for p in projects %}
+      <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch">
+        <article class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden bsb-overlay-hover w-100 transition-transform hover-lift card-hover-scale">
+          
+          <a href="{% if p.lab and p.field %}{% url 'project' lab_slug=p.lab.slug field_slug=p.field.slug project_slug=p.slug %}{% else %}#{% endif %}" class="text-decoration-none">
+            <figure class="m-0 position-relative">
+              <img class="img-fluid bsb-scale bsb-hover-scale-up w-100 object-fit-cover" loading="lazy" 
+                   src="{% if p.main_image %}{{ p.main_image.url }}{% else %}https://placehold.co/600x240/0f172a/ffffff?text={{ p.name|urlencode }}{% endif %}" 
+                   alt="{{ p.name }}" style="height: 240px;">
+              
+              {% if p.lab %}
+                <span class="badge bg-primary position-absolute top-0 start-0 m-3 fs-7">{{ p.lab.name }}</span>
+              {% else %}
+                <span class="badge bg-success position-absolute top-0 start-0 m-3 fs-7">{% trans "Спецпроект" %}</span>
+              {% endif %}
+            </figure>
+          </a>
+
+          <div class="card-body border-top border-4 border-primary p-4 d-flex flex-column">
+            <h5 class="card-title fw-bolder mb-2">
+              {{p.name}}
+            </h5>
+            <p class="card-text text-secondary mb-4 flex-grow-1 line-clamp-3">
+              {{p.description|striptags}}
+            </p>
+            
+            <div class="mt-auto">
+                {% if p.lab and p.field %}
+                <a href="{% url 'project' lab_slug=p.lab.slug field_slug=p.field.slug project_slug=p.slug %}" class="fw-bold text-decoration-none link-secondary hover-link-primary link-animated">
+                    {% trans "Подробнее" %}
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
+                      <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z" />
+                    </svg>
+                </a>
+                {% else %}
+                 <span class="text-muted small">{% trans "Описание доступно по запросу" %}</span>
+                {% endif %}
+            </div>
+          </div>
+        </article>
+      </div>
+      {% empty %}
+      <div class="col-12">
+        <div class="alert alert-info text-center" role="alert">
+          <h4 class="alert-heading">{% trans "Проектов пока нет" %}</h4>
+        </div>
+      </div>
+      {% endfor %}
+    </div>
+  </div>
+</section>
+{% endblock main %}

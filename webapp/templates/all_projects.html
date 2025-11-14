@@ -4,7 +4,9 @@
 
 {% block nav %}
 <section class="bg-dark text-white position-relative overflow-hidden pt-5 pb-4">
-  <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(rgba(13, 22, 46, 0.9), rgba(13, 22, 46, 0.7)), url('{% static "assets/img/hero/service-img-1.webp" %}') no-repeat center center; background-size: cover; filter: grayscale(80%);"></div>
+  <div class="position-absolute w-100 h-100 top-0 start-0"
+       style="background: linear-gradient(rgba(13, 22, 46, 0.9), rgba(13, 22, 46, 0.7)), url('{% if settings.hero_image_all_projects %}{{ settings.hero_image_all_projects.url }}{% else %}{% static "assets/img/hero/service-img-1.webp" %}{% endif %}') no-repeat center center; background-size: cover; filter: grayscale(80%);">
+  </div>
 
   <div class="container position-relative py-5" style="z-index: 2;">
     <div class="row justify-content-center text-center pt-5 pb-5">
@@ -16,7 +18,6 @@
   </div>
 </section>
 {% endblock nav %}
-
 {% block main %}
 <section class="py-5 py-xl-8 bg-light">
   <div class="container mb-5">
@@ -32,7 +33,7 @@
     <div class="row gy-4 gx-4 justify-content-center">
       {% for p in projects %}
       <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch">
-        <article class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden bsb-overlay-hover w-100 transition-transform hover-lift">
+        <article class="card h-100 border-0 shadow-lg rounded-4 overflow-hidden bsb-overlay-hover w-100 transition-transform hover-lift card-hover-scale">
           <a href="{% url 'project' lab_slug=lab.slug field_slug=p.field.slug project_slug=p.slug %}" class="text-decoration-none">
             <figure class="m-0 position-relative">
               <img class="img-fluid bsb-scale bsb-hover-scale-up" loading="lazy" src="{% if p.main_image %}{{ p.main_image.url }}{% else %}https://placehold.co/600x240/0f172a/ffffff?text={{ p.name|urlencode }}{% endif %}" alt="{{ p.name }}" style="height: 240px; width: 100%; object-fit: cover;">
@@ -47,7 +48,7 @@
               {{p.description|truncatewords:25|safe}}
             </p>
             <div class="mt-auto">
-                <a href="{% url 'project' lab_slug=lab.slug field_slug=p.field.slug project_slug=p.slug %}" class="fw-bold text-decoration-none link-secondary hover-link-primary">
+                <a href="{% url 'project' lab_slug=lab.slug field_slug=p.field.slug project_slug=p.slug %}" class="fw-bold text-decoration-none link-secondary hover-link-primary link-animated">
                     {% trans "Подробнее" %}
                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-short" viewBox="0 0 16 16">
                       <path fill-rule="evenodd" d="M4 8a.5.5 0 0 1 .5-.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5A.5.5 0 0 1 4 8z" />

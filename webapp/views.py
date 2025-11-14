@@ -1,34 +1,30 @@
-from django.http import HttpResponseRedirect
+from django.http import HttpResponseRedirect, Http404, JsonResponse  # <-- Добавил JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
+from django.views.decorators.csrf import csrf_exempt  # <-- Добавил
+from django.views.decorators.http import require_POST # <-- Добавил
 import random
+import json  # <-- Добавил
+import markdown
 from django.contrib import messages
 from django.db.models import F
-from django.utils.translation import get_language  # Для получения текущего языка
-from parler.views import get_language_tabs  # Для корректной работы вкладок Parler (если используется)
-
-# Импортируем все модели, которые используются на сайте
+from .ai_assistant import ask_gemini
 from .models import (
     Lab, Field, Project, TeamMember, Application,
-    Mailing, SuccessFact, NewsItem, Partner,  # NewsArticle заменен на NewsItem
-    SiteSettings, MissionItem, Announcement  # Добавлены новые модели
+    Mailing, SuccessFact, NewsItem, Partner,
+    SiteSettings, MissionItem, Announcement, Management
 )
 
 
-# --- Вспомогательная функция для получения общих данных ---
+# --- Вспомогательная функция ---
 def get_common_context():
-    """Получает общие данные, необходимые для многих шаблонов (например, футер)."""
-    try:
-        settings = SiteSettings.objects.first()
-    except:
-        # Заглушка, если база данных еще пуста
-        settings = None
-
-        # Получаем лаборатории для футера
+    """
+    Возвращает контекст, который нужен на каждой странице (например, для футера).
+    """
+    settings = SiteSettings.objects.first()
     labs = Lab.objects.all()
-
     return {
         'settings': settings,
-        'labs': labs,  # Используется в base.html (футер)
+        'labs': labs,
     }
 
 
@@ -38,19 +34,16 @@ def index(request):
     """Главная страница."""
     context = get_common_context()
 
-    # Получаем данные для разных блоков на странице
     fields = Field.objects.all()
+    # Лучшие 3 проекта (последние добавленные)
     best_projects = Project.objects.all().select_related('lab').order_by('-id')[:3]
     partners = Partner.objects.all()
-
-    # Получаем Mission/Goals/Strategy
     mission_items = MissionItem.objects.all()
 
-    # Добавляем последние новости (для блока на главной странице)
-    latest_news = NewsItem.objects.order_by(F('publish_date').desc(nulls_last=True))[:2]
-
-    # Добавляем последние объявления
-    latest_announcements = Announcement.objects.order_by(F('event_date').desc(nulls_last=True))[:3]
+    # Последние 3 новости
+    latest_news = NewsItem.objects.order_by(F('publish_date').desc(nulls_last=True))[:3]
+    # Последние 4 объявления
+    latest_announcements = Announcement.objects.order_by(F('event_date').desc(nulls_last=True))[:4]
 
     context.update({
         'all_fields': fields,
@@ -67,21 +60,32 @@ def about(request):
     """Страница 'О нас'."""
     context = get_common_context()
 
-    all_fields_list = list(Field.objects.all())
-    sample_size = min(len(all_fields_list), 6)
-    random_fields = random.sample(all_fields_list, sample_size)
+    # 1. Секция направлений (берем случайные Лаборатории для разнообразия или все)
+    all_labs_list = list(Lab.objects.all())
+    # Если лабораторий больше 6, берем 6 случайных, иначе все
+    sample_size = min(len(all_labs_list), 6)
+    labs_for_display = random.sample(all_labs_list, sample_size)
 
+    # 2. Контент страницы
     success_facts = SuccessFact.objects.all()
-    team_members = TeamMember.objects.all()
-
-    # Mission/Goals/Strategy также отображаются на странице About
     mission_items = MissionItem.objects.all()
 
+    # ВАЖНО: Добавили партнеров, чтобы блок внизу не был пустым
+    partners = Partner.objects.all()
+
+    # 3. КОМАНДА: Показываем только тех, у кого в админке стоит галочка "Показывать в О нас"
+    team_members = TeamMember.objects.filter(is_featured=True)
+
+    # 4. РУКОВОДСТВО: Сортируем по полю order (1, 2, 3...)
+    management_members = Management.objects.all().order_by('order')
+
     context.update({
-        'all_fields': random_fields,
-        'team_members': team_members,
+        'all_fields': labs_for_display,  # Используется в слайдере "Направления"
+        'team_members': team_members,  # Избранные сотрудники
         'success_facts': success_facts,
         'mission_items': mission_items,
+        'management_members': management_members,
+        'partners': partners,  # Партнеры (логотипы)
     })
     return render(request, 'about.html', context)
 
@@ -89,121 +93,132 @@ def about(request):
 def contacts(request):
     """Страница контактов."""
     context = get_common_context()
-    # Данные для контактов уже в 'settings'
     return render(request, 'contacts.html', context)
 
 
 def how(request):
-    """Страница 'Как это работает'."""
+    """Страница 'Как это работает' (или список всех Лабораторий)."""
     context = get_common_context()
+    context['labs'] = Lab.objects.all()
     return render(request, 'how.html', context)
 
 
 # --- СТРАНИЦЫ ЛАБОРАТОРИЙ ---
 
 def lab_list(request):
-    """Страница со списком ВСЕХ лабораторий."""
+    """Список всех лабораторий (альтернативный вид)."""
     context = get_common_context()
-
     labs = Lab.objects.all()
-
-    context.update({
-        'labs': labs,
-    })
+    context.update({'labs': labs})
     return render(request, 'lab_list.html', context)
 
 
 def lab_detail(request, lab_slug):
-    """Детальная страница одной лаборатории."""
+    """Детальная страница лаборатории."""
     context = get_common_context()
-
     lab = get_object_or_404(Lab, slug=lab_slug)
     lab_fields = lab.fields.all()
-
-    context.update({
-        'lab': lab,
-        'lab_fields': lab_fields
-    })
+    context.update({'lab': lab, 'lab_fields': lab_fields})
     return render(request, 'lab.html', context)
 
 
 # --- СТРАНИЦЫ ПРОЕКТОВ ---
 
 def projects(request, lab_slug, field_slug):
-    """Страница проектов, отфильтрованных по лаборатории И направлению."""
+    """Список проектов, отфильтрованных по Лаборатории И Направлению."""
     context = get_common_context()
-
     lab = get_object_or_404(Lab, slug=lab_slug)
     field = get_object_or_404(Field, slug=field_slug)
     projects = Project.objects.filter(lab=lab, field=field)
-
-    context.update({
-        'projects': projects,
-        'lab': lab,
-        'field': field,
-    })
+    context.update({'projects': projects, 'lab': lab, 'field': field})
     return render(request, 'projects.html', context)
 
 
 def all_projects(request, lab_slug):
-    """Страница всех проектов одной лаборатории."""
+    """Все проекты конкретной лаборатории."""
     context = get_common_context()
-
     lab = get_object_or_404(Lab, slug=lab_slug)
     projects = Project.objects.filter(lab=lab)
-
-    context.update({
-        'projects': projects,
-        'lab': lab,
-    })
+    context.update({'projects': projects, 'lab': lab})
     return render(request, 'all_projects.html', context)
 
 
 def project(request, lab_slug, field_slug, project_slug):
-    """Детальная страница одного проекта."""
+    """Детальная страница проекта (ПРИВЯЗАННОГО К ЛАБОРАТОРИИ)."""
     context = get_common_context()
-
+    # Ищем проект, который принадлежит указанной лабе и направлению
     project = get_object_or_404(Project, slug=project_slug, lab__slug=lab_slug, field__slug=field_slug)
 
+    # Похожие проекты (той же лаборатории, кроме текущего)
     related_projects = Project.objects.filter(lab=project.lab).exclude(slug=project.slug)[:4]
+
+    # Команда этого проекта
+    project_team = project.team.all()
 
     context.update({
         'project': project,
+        'related_projects': related_projects,
+        'project_team': project_team,
+    })
+    return render(request, 'project.html', context)
+
+
+def project_detail_independent(request, project_slug):
+    """
+    Детальная страница НЕЗАВИСИМОГО проекта (без лаборатории).
+    """
+    context = get_common_context()
+
+    # Ищем проект просто по slug (без привязки к лабе)
+    project = get_object_or_404(Project, slug=project_slug)
+
+    project_team = project.team.all()
+
+    # Похожие проекты (просто последние добавленные, так как лабы нет)
+    related_projects = Project.objects.exclude(slug=project.slug).order_by('-date')[:3]
+
+    context.update({
+        'project': project,
+        'project_team': project_team,
         'related_projects': related_projects,
     })
     return render(request, 'project.html', context)
 
 
-# --- СТРАНИЦЫ НОВОСТЕЙ ---
-
-def news_list(request):
-    """Страница со списком всех новостей."""
+def global_portfolio(request):
+    """Страница со ВСЕМИ проектами (и от лабораторий, и отдельные)."""
     context = get_common_context()
 
-    news = NewsItem.objects.all().order_by(F('publish_date').desc(nulls_last=True))  # NewsArticle заменен на NewsItem
+    all_projects = Project.objects.all().order_by('-date')
 
     context.update({
-        'news_list': news,
+        'projects': all_projects,
     })
-    return render(request, 'news_list.html', context)
+    return render(request, 'portfolio.html', context)
+
+
+# --- СТРАНИЦЫ НОВОСТЕЙ ---
+
+def news_all(request):
+    """Страница всех новостей."""
+    context = get_common_context()
+    all_news = NewsItem.objects.all().order_by(F('publish_date').desc(nulls_last=True))
+    context.update({'all_news': all_news})
+    return render(request, 'news_all.html', context)
 
 
 def news_detail(request, news_slug):
-    """Страница с детальной информацией о новости."""
+    """Детальная страница новости."""
     context = get_common_context()
-
-    news_item = get_object_or_404(NewsItem, slug=news_slug)  # NewsArticle заменен на NewsItem
-
-    context.update({
-        'news_item': news_item,
-    })
+    news_item = get_object_or_404(NewsItem, slug=news_slug)
+    context.update({'news_item': news_item})
     return render(request, 'news_detail.html', context)
 
 
-# --- ОБРАБОТЧИКИ ФОРМ ---
+# --- ОБРАБОТЧИКИ ФОРМ (POST) ---
 
 def contact_form(request):
-    """Обработчик формы обратной связи."""
+    """Обработка формы 'Оставить заявку'."""
     if request.method == 'POST':
         Application.objects.create(
             full_name=request.POST.get('fullname', ''),
@@ -217,7 +232,7 @@ def contact_form(request):
 
 
 def mailing_form(request):
-    """Обработчик формы подписки на рассылку."""
+    """Обработка формы подписки на рассылку."""
     if request.method == 'POST':
         email = request.POST.get('email')
         if email:
@@ -226,5 +241,56 @@ def mailing_form(request):
                 messages.success(request, 'Спасибо! Вы успешно подписались на рассылку.')
             else:
                 messages.info(request, 'Этот email уже подписан на рассылку.')
-
+    # Возвращает пользователя на ту же страницу, откуда пришел запрос
     return HttpResponseRedirect(request.META.get('HTTP_REFERER', '/'))
+
+
+def team_member_detail(request, pk):
+    """
+    Детальная страница сотрудника.
+    """
+    context = get_common_context()
+    member = None
+    is_management = False
+
+    try:
+        # Сначала ищем в таблице Руководства
+        member = Management.objects.get(pk=pk)
+        is_management = True
+    except Management.DoesNotExist:
+        try:
+            # Если не нашли, ищем в таблице Команды
+            member = get_object_or_404(TeamMember, pk=pk)
+            is_management = False
+        except TeamMember.DoesNotExist:
+            raise Http404("Член команды не найден.")
+
+    context.update({
+        'member': member,
+        'is_management': is_management
+    })
+    return render(request, 'team_member_detail.html', context)
+
+
+# --- API GEMINI ---
+
+@csrf_exempt
+@require_POST
+def chat_api(request):
+    """API для общения с Gemini через AJAX"""
+    try:
+        data = json.loads(request.body)
+        user_message = data.get('message', '')
+
+        if not user_message:
+            return JsonResponse({'error': 'Empty message'}, status=400)
+
+        # Спрашиваем Gemini (функция из ai_assistant.py)
+        ai_response = ask_gemini(user_message)
+
+        # Преобразуем Markdown в HTML
+        html_response = markdown.markdown(ai_response)
+
+        return JsonResponse({'response': html_response})
+    except Exception as e:
+        return JsonResponse({'error': str(e)}, status=500)

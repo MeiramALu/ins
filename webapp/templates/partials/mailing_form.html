@@ -1,0 +1,10 @@
+{% load i18n %}
+<form action="{% url 'mailing_form' %}" method="post">
+    {% csrf_token %}
+    <div class="input-group">
+        <input type="email" name="email" class="form-control rounded-start-pill py-2" placeholder="{% trans "Ваш Email" %}" required>
+        <button type="submit" class="btn btn-primary rounded-end-pill px-4 transition-transform hover-lift-sm">
+            <i class="bi bi-send-fill"></i>
+        </button>
+    </div>
+</form>

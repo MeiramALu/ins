@@ -2,9 +2,10 @@
 body {
     font-family: 'Poppins', sans-serif;
 }
-/* Установим основной акцентный цвет для лучшей консистентности */
+
 :root {
-    --bs-primary: #0d6efd; /* Цвет Bootstrap Primary */
+    --bs-primary: #0d6efd;
+    --lift-distance: 10px; /* Увеличено для заметного эффекта */
 }
 
 /* --- Навигация (Header) --- */
@@ -16,14 +17,13 @@ body {
 .navbar-dark .navbar-nav .nav-link.active {
     color: #ffffff;
 }
-/* Стиль для Sticky Navbar, чтобы убедиться, что она видна */
 .sticky-top {
     z-index: 1020;
 }
 
 /* --- Футер (Footer) --- */
 .footer {
-    background-color: #0d162e; /* Темно-синий, как в макете */
+    background-color: #0d162e;
 }
 .footer .link-secondary {
     color: rgba(255, 255, 255, 0.6) !important;
@@ -34,7 +34,7 @@ body {
     text-decoration: underline !important;
 }
 
-/* --- Пользовательские Переходы и Тени (из предыдущего ответа) --- */
+/* --- Пользовательские Переходы и Тени (Динамика) --- */
 
 /* Общие Переходы */
 .transition-shadow {
@@ -48,13 +48,15 @@ body {
 .transition-transform {
     transition: transform 0.3s ease-in-out, box-shadow 0.3s ease-in-out;
 }
+/* Заметный подъем (для больших карточек) */
 .hover-lift:hover {
-    transform: translateY(-8px);
-    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.18) !important;
+    transform: translateY(calc(var(--lift-distance) * -1));
+    box-shadow: 0 1rem 2rem rgba(0, 0, 0, 0.22) !important;
 }
+/* Небольшой подъем (для команды, миссии) */
 .hover-lift-sm:hover {
-    transform: translateY(-5px);
-    box-shadow: 0 0.75rem 1.5rem rgba(0, 0, 0, 0.12) !important;
+    transform: translateY(-5px); /* Обеспечивает движение */
+    box-shadow: 0 0.8rem 1.8rem rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Динамика Фона и Ссылок */
@@ -79,7 +81,27 @@ body {
     opacity: 1 !important;
 }
 
-/* Отступы для секций */
+/* 1. Эффект масштабирования для изображения */
+.card-hover-scale {
+    overflow: hidden;
+}
+.card-hover-scale img {
+    transition: transform 0.4s ease-in-out;
+}
+.card-hover-scale:hover img {
+    transform: scale(1.05);
+}
+
+/* 2. Эффект движения стрелки для ссылок "Подробнее" */
+.link-animated {
+    display: inline-block;
+    transition: transform 0.3s ease-in-out;
+}
+.link-animated:hover {
+    transform: translateX(4px);
+}
+
+/* --- Отступы для секций --- */
 section {
     padding-top: 5rem;
     padding-bottom: 5rem;
@@ -89,4 +111,60 @@ section {
         padding-top: 7rem;
         padding-bottom: 7rem;
     }
+}
+
+/* =======================================================
+   ======== СТИЛИ ДЛЯ СЛАЙДЕРОВ (SWIPER & CARDS) ========
+   ======================================================= */
+
+/* Делаем слайд "резиновым" по высоте, чтобы карточки внутри тянулись */
+.swiper-slide {
+    height: auto;
+    display: flex;
+    justify-content: center;
+}
+
+/* Класс для карточек внутри слайдера, чтобы они были одной высоты */
+.card-equal-height {
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Ограничение текста описания до 3 строк */
+.line-clamp-3 {
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Цвет активной точки пагинации (используем переменную темы) */
+.swiper-pagination-bullet-active {
+    background-color: var(--bs-primary) !important;
+}
+
+/* Дополнительный отступ снизу для контейнера слайдера (место под точки) */
+.swiper-pb-5 {
+    padding-bottom: 3rem;
+}
+
+/* --- Специальные стили для project.html --- */
+.icon-square {
+    width: 50px;
+    height: 50px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 12px;
+    font-size: 1.5rem;
+}
+.border-left-accent {
+    border-left: 5px solid #0d6efd; /* Цвет по умолчанию для акцента */
+}
+/* Цвет для второго блока преимуществ */
+.border-left-accent.success {
+    border-left-color: #198754;
 }

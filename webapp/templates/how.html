@@ -4,7 +4,9 @@
 
 {% block nav %}
 <section class="text-white position-relative overflow-hidden pt-5 pb-4" style="background-color: #0d162e;">
-  <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(rgba(13, 22, 46, 0.95), rgba(13, 22, 46, 0.8)), url('{% static "assets/img/hero/lab-list-img.webp" %}') no-repeat center center; background-size: cover; filter: grayscale(80%);"></div>
+  <div class="position-absolute w-100 h-100 top-0 start-0"
+       style="background: linear-gradient(rgba(13, 22, 46, 0.95), rgba(13, 22, 46, 0.8)), url('{% if settings.hero_image_labs %}{{ settings.hero_image_labs.url }}{% else %}{% static "assets/img/hero/lab-list-img.webp" %}{% endif %}') no-repeat center center; background-size: cover; filter: grayscale(80%);">
+  </div>
 
   <div class="container position-relative py-5" style="z-index: 2;">
     <div class="row justify-content-center text-center pt-5 pb-5">
@@ -43,7 +45,7 @@
           {% endif %}
       {% endwith %}
       <div class="col-12 col-md-6 col-lg-4 d-flex align-items-stretch" data-aos="fade-up" data-aos-delay="{{ delay }}">
-        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden w-100 transition-transform hover-lift">
+        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden w-100 transition-transform hover-lift card-hover-scale">
           <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="text-decoration-none">
             <figure class="m-0">
               <img class="img-fluid bsb-scale bsb-hover-scale-up" loading="lazy" src="{% if lab.image %}{{ lab.image.url }}{% else %}https://placehold.co/600x400/0f172a/ffffff?text={{ lab.name|urlencode }}{% endif %}" alt="{{ lab.name }}" style="height: 220px; width: 100%; object-fit: cover;">
@@ -54,7 +56,10 @@
                 <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="link-dark text-decoration-none hover-link-primary">{{ lab.name }}</a>
             </h5>
             <p class="card-text text-secondary mb-4 flex-grow-1">{{ lab.description|truncatewords:20 }}</p>
-            <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="btn btn-sm btn-outline-primary rounded-pill">{% trans "Перейти к лаборатории" %}</a>
+
+            <a href="{% url 'lab_detail' lab_slug=lab.slug %}" class="btn btn-sm btn-outline-primary rounded-pill transition-transform hover-lift-sm">
+                {% trans "Перейти к лаборатории" %}
+            </a>
           </div>
         </div>
       </div>

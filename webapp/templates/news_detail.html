@@ -1,0 +1,80 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block nav %}
+<section class="bg-dark text-white position-relative overflow-hidden pt-5 pb-4">
+    <div class="position-absolute w-100 h-100 top-0 start-0"
+         style="background: linear-gradient(rgba(13, 22, 46, 0.9), rgba(13, 22, 46, 0.7)), url('{% if settings.hero_image_news_detail %}{{ settings.hero_image_news_detail.url }}{% else %}{% static "assets/img/hero/hero-img-1.webp" %}{% endif %}') no-repeat center center; background-size: cover; filter: grayscale(80%);">
+    </div>
+
+    <div class="container py-5 text-center position-relative" style="z-index: 2;">
+        <div class="row justify-content-center pt-5 pb-3">
+            <div class="col-lg-10 col-xl-8 pt-5 pb-3" data-aos="zoom-out">
+                <p class="fs-6 mb-2 text-primary text-uppercase fw-semibold text-shadow">{{ news_item.publish_date|date:"d F, Y" }}</p>
+                <h1 class="display-3 fw-bolder mb-3 text-shadow">{{ news_item.title }}</h1>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock nav %}
+
+{% block main %}
+<section class="py-5 py-xl-8 bg-white">
+    <div class="container">
+        <div class="row gy-5 justify-content-center">
+
+            {# ОСНОВНАЯ КОНТЕНТНАЯ ЧАСТЬ #}
+            <div class="col-12 col-lg-8">
+                <article class="news-content">
+                    
+                    <div class="mb-5 shadow-lg rounded-4 overflow-hidden transition-transform hover-lift-sm" data-aos="fade-up">
+                        {% if news_item.image %}
+                            <img src="{{ news_item.image.url }}"
+                                 class="img-fluid w-100 object-fit-cover"
+                                 alt="{{ news_item.title }}"
+                                 style="max-height: 450px;">
+                        {% else %}
+                            <div class="p-5 w-100 d-flex align-items-center justify-content-center text-white rounded-4" style="background-color: #0f172a; height: 350px;">
+                                <h3 class="fw-bold">{% trans "Изображение новости отсутствует" %}</h3>
+                            </div>
+                        {% endif %}
+                    </div>
+
+                    <div class="lead text-secondary mb-5">
+                        {{ news_item.content|safe }}
+                    </div>
+                </article>
+
+                <hr class="my-5">
+
+                <div class="d-flex justify-content-start align-items-center" data-aos="fade-up" data-aos-delay="100">
+                    <span class="fw-bold me-3">{% trans "Поделиться:" %}</span>
+                    <a href="https://www.linkedin.com/shareArticle?mini=true&url={{ request.build_absolute_uri }}" target="_blank" class="text-secondary mx-2 fs-4 hover-link-primary link-animated"><i class="bi bi-linkedin"></i></a>
+                    <a href="https://twitter.com/intent/tweet?text={{ news_item.title|urlencode }}&url={{ request.build_absolute_uri }}" target="_blank" class="text-secondary mx-2 fs-4 hover-link-primary link-animated"><i class="bi bi-twitter"></i></a>
+                    <a href="mailto:?subject={{ news_item.title|urlencode }}&body={% trans "Я нашел эту интересную новость:" %} {{ news_item.title|urlencode }} - {{ request.build_absolute_uri }}" class="text-secondary mx-2 fs-4 hover-link-primary link-animated"><i class="bi bi-envelope-fill"></i></a>
+                </div>
+            </div>
+
+            {# БОКОВОЙ БАР (Связанные новости или Архив) #}
+            <div class="col-12 col-lg-4">
+                <div class="sticky-top" style="top: 20px;">
+                    <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 transition-transform hover-lift-sm">
+                        <a href="{% url 'news_all' %}" class="btn btn-primary rounded-pill fw-bold">
+                            <i class="bi bi-arrow-left-short"></i> {% trans "Все новости" %}
+                        </a>
+                    </div>
+                    
+                    <div class="card border-0 shadow-lg rounded-4 p-4 bg-light transition-shadow hover-shadow-lg">
+                        <h5 class="fw-bolder mb-3">{% trans "Подписка на рассылку" %}</h5>
+                        <p class="small text-secondary">{% trans "Получайте самые свежие новости и анонсы прямо на почту." %}</p>
+                        {% include "partials/mailing_form.html" %} 
+                    </div>
+                    
+                    </div>
+            </div>
+
+        </div>
+    </div>
+</section>
+{% endblock main %}

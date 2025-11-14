@@ -1,0 +1,61 @@
+{% extends 'base.html' %}
+{% load static %}
+{% load i18n %}
+
+{% block nav %}
+<section class="bg-dark text-white position-relative overflow-hidden pt-5 pb-4">
+    <div class="position-absolute w-100 h-100 top-0 start-0"
+         style="background: linear-gradient(rgba(13, 22, 46, 0.9), rgba(13, 22, 46, 0.7)), url('{% if settings.hero_image_news %}{{ settings.hero_image_news.url }}{% else %}{% static "assets/img/hero/hero-img-1.webp" %}{% endif %}') no-repeat center center; background-size: cover; filter: grayscale(80%);">
+    </div>
+
+    <div class="container position-relative py-5" style="z-index: 2;">
+        <div class="row justify-content-center text-center pt-5 pb-5">
+            <div class="col-lg-10 col-xl-8 pt-5 pb-3">
+                <h1 class="display-2 fw-bolder mb-3 text-shadow">{% trans "Архив новостей и публикации" %}</h1>
+                <p class="fs-5 mb-0 text-light opacity-75 text-shadow">{% trans "Будьте в курсе последних событий, исследований и публикаций нашего института." %}</p>
+            </div>
+        </div>
+    </div>
+</section>
+{% endblock nav %}
+
+{% block main %}
+<section class="py-5 py-xl-8 bg-white">
+    <div class="container">
+        <div class="row gy-4">
+            {% for news in all_news %}
+            <div class="col-12">
+                <div class="card border-0 shadow-lg rounded-4 transition-shadow hover-shadow-lg transition-transform hover-lift-sm card-hover-scale">
+                    <div class="row g-0">
+                        <div class="col-md-3">
+                            <a href="{% url 'news_detail' news_slug=news.slug %}" class="d-block">
+                                <img src="{% if news.image %}{{ news.image.url }}{% else %}https://placehold.co/600x200/334155/ffffff?text={% trans "Новость" %}{% endif %}" 
+                                    class="img-fluid rounded-start-4 w-100 h-100 object-fit-cover" alt="{{ news.title }}" style="height: 200px;">
+                            </a>
+                        </div>
+                        <div class="col-md-9">
+                            <div class="card-body p-4">
+                                <p class="text-primary small mb-1 fw-bold">{{ news.publish_date|date:"d F, Y" }}</p>
+                                <h4 class="card-title fw-bolder mb-2">
+                                    <a href="{% url 'news_detail' news_slug=news.slug %}" class="text-dark text-decoration-none hover-link-primary">{{ news.title }}</a>
+                                </h4>
+                                <p class="card-text text-secondary">{{ news.excerpt|default:news.content|striptags|truncatewords:40 }}</p>
+                                <a href="{% url 'news_detail' news_slug=news.slug %}" class="fw-bold text-decoration-none link-secondary hover-link-primary link-animated mt-2 d-inline-block">
+                                    {% trans "Читать полностью" %} <i class="bi bi-arrow-right-short"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-12">
+                <div class="alert alert-info text-center" role="alert">
+                    <p>{% trans "В данный момент в архиве нет опубликованных новостей." %}</p>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</section>
+{% endblock main %}

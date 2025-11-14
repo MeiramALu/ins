@@ -1,14 +1,14 @@
-{% load static %}
+{% load static i18n %}
 <!doctype html>
-<html lang="ru">
+<html lang="{{ LANGUAGE_CODE }}">
 
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
-  <title>Digitalem</title>
-  <meta name="description" content="Digitalem Institute of IT and Innovative Technologies.">
-  <meta name="author" content="Digitalem">
+  <title>KAZNU Institute</title>
+  <meta name="description" content="KAZNU Institute of IT and Innovative Technologies.">
+  <meta name="author" content="KAZNU Institute">
 
   <link rel="icon" type="image/png" sizes="512x512" href="{% static 'assets/favicon/Logo_RGB_white.png' %}">
 
@@ -19,13 +19,16 @@
   <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
 
+  <link rel="stylesheet" href="{% static 'css/style.css' %}">
+
+  {% block extra_css %}{% endblock %}
 
   <style>
     body {
       font-family: 'Poppins', sans-serif;
     }
     .footer {
-      background-color: #0d162e; /* Темно-синий, как в макете */
+      background-color: #0d162e;
     }
     .footer .link-secondary:hover {
       color: #ffffff !important;
@@ -37,6 +40,33 @@
     .navbar-dark .navbar-nav .nav-link:hover, .navbar-dark .navbar-nav .nav-link.active {
         color: #ffffff;
     }
+    /* Стиль для активного языка в выпадающем меню */
+    .dropdown-item.active, .dropdown-item:active {
+        background-color: #0d162e;
+    }
+
+    /* --- СТИЛИ ДЛЯ AI ЧАТА --- */
+    #chat-widget-btn {
+        transition: transform 0.3s ease;
+    }
+    #chat-widget-btn:hover {
+        transform: scale(1.1);
+    }
+    #chat-window {
+        animation: slideUp 0.3s ease-out;
+    }
+    @keyframes slideUp {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    /* Полоса прокрутки для чата */
+    #chat-messages::-webkit-scrollbar {
+        width: 6px;
+    }
+    #chat-messages::-webkit-scrollbar-thumb {
+        background-color: rgba(0,0,0,0.2);
+        border-radius: 3px;
+    }
   </style>
 </head>
 
@@ -44,28 +74,61 @@
   <header id="header">
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark sticky-top shadow-sm">
       <div class="container">
-        <a class="navbar-brand" href="{% url 'index' %}">
-          <img src="{% static 'assets/img/branding/Logo_RGB_white.svg' %}" alt="Digitalem Logo" style="height: 40px;">
+        <a class="navbar-brand d-flex align-items-center" href="{% url 'index' %}">
+          <img src="{% static 'assets/img/branding/kaznu_logo.jpg' %}" alt="KAZNU Institute" style="height: 50px; border-radius: 8px;">
+          <span class="ms-3 fw-bold fs-5 d-none d-sm-inline">KAZNU INSTITUTE</span>
         </a>
         <button class="navbar-toggler border-0" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbar" aria-controls="mainNavbar" aria-expanded="false" aria-label="Toggle navigation">
           <span class="navbar-toggler-icon"></span>
         </button>
+
         <div class="collapse navbar-collapse" id="mainNavbar">
-          <ul class="navbar-nav ms-auto mb-2 mb-lg-0">
+          <ul class="navbar-nav ms-auto mb-2 mb-lg-0 align-items-center">
+
             {% with request.path|default:'' as current_path %}
             <li class="nav-item">
-              <a class="nav-link {% if current_path == '/' %}active{% endif %}" aria-current="page" href="{% url 'index' %}">Домой</a>
+              <a class="nav-link {% if current_path == '/' %}active{% endif %}" aria-current="page" href="{% url 'index' %}">{% trans "Домой" %}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if current_path == '/how/' or current_path|slice:":6" == '/labs/' %}active{% endif %}" href="{% url 'how' %}">Лаборатории</a>
+              <a class="nav-link {% if current_path == '/how/' or current_path|slice:":6" == '/labs/' %}active{% endif %}" href="{% url 'how' %}">{% trans "Лаборатории" %}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if current_path == '/about/' %}active{% endif %}" href="{% url 'about' %}">О нас</a>
+              <a class="nav-link {% if current_path == '/about/' %}active{% endif %}" href="{% url 'about' %}">{% trans "О нас" %}</a>
             </li>
             <li class="nav-item">
-              <a class="nav-link {% if current_path == '/contacts/' %}active{% endif %}" href="{% url 'contacts' %}">Контакты</a>
+              <a class="nav-link {% if current_path == '/contacts/' %}active{% endif %}" href="{% url 'contacts' %}">{% trans "Контакты" %}</a>
             </li>
             {% endwith %}
+
+            {# --- ПЕРЕКЛЮЧАТЕЛЬ ЯЗЫКОВ --- #}
+            {% get_current_language as LANGUAGE_CODE %}
+            {% get_available_languages as LANGUAGES %}
+            {% get_language_info_list for LANGUAGES as languages %}
+
+            <li class="nav-item dropdown ms-lg-3">
+              <a class="nav-link dropdown-toggle d-flex align-items-center" href="#" id="languageDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <i class="bi bi-globe me-1"></i> {{ LANGUAGE_CODE|upper }}
+              </a>
+              <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="languageDropdown">
+                {% for language in languages %}
+                  <li>
+                    <form action="{% url 'set_language' %}" method="post">
+                        {% csrf_token %}
+                        <input name="next" type="hidden" value="{{ request.path }}">
+                        <input name="language" type="hidden" value="{{ language.code }}">
+                        <button type="submit" class="dropdown-item d-flex justify-content-between align-items-center {% if language.code == LANGUAGE_CODE %}active{% endif %}">
+                            {{ language.name_local }}
+                            {% if language.code == LANGUAGE_CODE %}
+                            <i class="bi bi-check"></i>
+                            {% endif %}
+                        </button>
+                    </form>
+                  </li>
+                {% endfor %}
+              </ul>
+            </li>
+            {# --- КОНЕЦ ПЕРЕКЛЮЧАТЕЛЯ --- #}
+
           </ul>
         </div>
       </div>
@@ -99,16 +162,16 @@
 
         <div class="col-md-4 col-lg-4 col-xl-4 mx-auto mb-4">
           <h6 class="text-uppercase fw-bold mb-4">
-            Digitalem
+            KAZNU Institute
           </h6>
           <p>
-            Научно-исследовательский институт информационных и инновационных технологий при КазНУ. Разработка современных IT-решений.
+            {% trans "Научно-исследовательский институт информационных и инновационных технологий при КазНУ. Разработка современных IT-решений." %}
           </p>
         </div>
 
         <div class="col-md-2 col-lg-2 col-xl-2 mx-auto mb-4">
           <h6 class="text-uppercase fw-bold mb-4">
-            Лаборатории
+            {% trans "Лаборатории" %}
           </h6>
           {% if labs %}
               {% for lab in labs %}
@@ -119,19 +182,21 @@
                   {% endif %}
               {% endfor %}
           {% endif %}
-        </div> <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
+        </div>
+
+        <div class="col-md-3 col-lg-2 col-xl-2 mx-auto mb-4">
           <h6 class="text-uppercase fw-bold mb-4">
-            Полезные ссылки
+            {% trans "Полезные ссылки" %}
           </h6>
-          <p><a href="{% url 'about' %}" class="link-secondary text-decoration-none">О нас</a></p>
-          <p><a href="{% url 'how' %}" class="link-secondary text-decoration-none">Все лаборатории</a></p>
-          <p><a href="{% url 'contacts' %}" class="link-secondary text-decoration-none">Контакты</a></p>
-          <p><a href="#!" class="link-secondary text-decoration-none">Политика конфиденциальности</a></p>
+          <p><a href="{% url 'about' %}" class="link-secondary text-decoration-none">{% trans "О нас" %}</a></p>
+          <p><a href="{% url 'how' %}" class="link-secondary text-decoration-none">{% trans "Все лаборатории" %}</a></p>
+          <p><a href="{% url 'contacts' %}" class="link-secondary text-decoration-none">{% trans "Контакты" %}</a></p>
+          <p><a href="#!" class="link-secondary text-decoration-none">{% trans "Политика конфиденциальности" %}</a></p>
         </div>
 
         <div class="col-md-3 col-lg-3 col-xl-3 mx-auto mb-md-0 mb-4">
-          <h6 class="text-uppercase fw-bold mb-4">Контакты</h6>
-          <p><i class="bi bi-geo-alt-fill me-3"></i>Әл-Фараби 71, Алматы, Қазақстан</p>
+          <h6 class="text-uppercase fw-bold mb-4">{% trans "Контакты" %}</h6>
+          <p><i class="bi bi-geo-alt-fill me-3"></i>{% trans "Әл-Фараби 71, Алматы, Қазақстан" %}</p>
           <p><i class="bi bi-envelope-fill me-3"></i>reanmor202@gmail.com</p>
           <p><i class="bi bi-telephone-fill me-3"></i>+7 706 409 17 45</p>
         </div>
@@ -141,7 +206,7 @@
       <div class="border-top border-secondary pt-4 mt-4">
         <div class="row align-items-center">
           <div class="col-md-6 text-center text-md-start">
-            <p class="mb-0">&copy; {% now "Y" %} Digitalem. Все права защищены.</p>
+            <p class="mb-0">&copy; {% now "Y" %} KAZNU Institute. {% trans "Все права защищены." %}</p>
           </div>
           <div class="col-md-6 text-center text-md-end">
             <a href="#!" class="text-white me-3"><i class="bi bi-facebook"></i></a>
@@ -155,7 +220,145 @@
     </div>
   </footer>
 
+  <div id="chat-widget-btn" style="position: fixed; bottom: 30px; right: 30px; z-index: 9999; cursor: pointer;">
+      <div style="background: #0d162e; width: 65px; height: 65px; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); border: 2px solid #fff;">
+          <i class="bi bi-chat-quote-fill" style="color: white; font-size: 30px;"></i>
+      </div>
+  </div>
+
+  <div id="chat-window" style="display: none; position: fixed; bottom: 110px; right: 30px; width: 360px; height: 550px; background: white; border-radius: 15px; box-shadow: 0 5px 25px rgba(0,0,0,0.25); z-index: 9999; flex-direction: column; overflow: hidden; border: 1px solid #ddd;">
+
+      <div style="background: #0d162e; color: white; padding: 15px; display: flex; justify-content: space-between; align-items: center;">
+          <div class="d-flex align-items-center">
+             <i class="bi bi-robot me-2" style="font-size: 20px;"></i>
+             <span style="font-weight: 600; font-size: 16px;">KAZNU AI Assistant</span>
+          </div>
+          <span id="close-chat" style="cursor: pointer; font-size: 20px;">&times;</span>
+      </div>
+
+      <div id="chat-messages" style="flex: 1; padding: 20px; overflow-y: auto; font-size: 14px; background: #f8f9fa;">
+          <div style="margin-bottom: 15px;">
+              <div style="background: #e9ecef; padding: 10px 15px; border-radius: 15px 15px 15px 0; display: inline-block; max-width: 85%; box-shadow: 0 1px 2px rgba(0,0,0,0.1);">
+                  <strong>Привет! 👋</strong><br>
+                  Я знаю всё о проектах и лабораториях KAZNU Institute. Спрашивай!
+              </div>
+          </div>
+      </div>
+
+      <div style="padding: 15px; border-top: 1px solid #dee2e6; display: flex; background: white; align-items: center;">
+          <input type="text" id="chat-input" placeholder="Задайте вопрос..." style="flex: 1; border: 1px solid #ced4da; border-radius: 25px; padding: 10px 15px; outline: none; font-size: 14px;">
+          <button id="send-btn" style="background: #0d162e; color: white; border: none; width: 42px; height: 42px; border-radius: 50%; margin-left: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
+              <i class="bi bi-send-fill" style="font-size: 16px;"></i>
+          </button>
+      </div>
+  </div>
+
+  <script>
+      // Логика открытия/закрытия
+      const chatBtn = document.getElementById('chat-widget-btn');
+      const chatWindow = document.getElementById('chat-window');
+      const closeChat = document.getElementById('close-chat');
+
+      chatBtn.addEventListener('click', () => {
+          if (chatWindow.style.display === 'none' || chatWindow.style.display === '') {
+              chatWindow.style.display = 'flex';
+          } else {
+              chatWindow.style.display = 'none';
+          }
+      });
+
+      closeChat.addEventListener('click', () => chatWindow.style.display = 'none');
+
+      // Логика отправки
+      const input = document.getElementById('chat-input');
+      const messages = document.getElementById('chat-messages');
+      const sendBtn = document.getElementById('send-btn');
+
+      function appendMessage(text, sender) {
+          const div = document.createElement('div');
+          div.style.marginBottom = '15px';
+          div.style.display = 'flex';
+          div.style.justifyContent = sender === 'user' ? 'flex-end' : 'flex-start';
+
+          const bubble = document.createElement('div');
+          bubble.style.padding = '10px 15px';
+          bubble.style.borderRadius = sender === 'user' ? '15px 15px 0 15px' : '15px 15px 15px 0';
+          bubble.style.background = sender === 'user' ? '#0d162e' : '#e9ecef';
+          bubble.style.color = sender === 'user' ? 'white' : '#212529';
+          bubble.style.maxWidth = '85%';
+          bubble.style.boxShadow = '0 1px 2px rgba(0,0,0,0.1)';
+          bubble.style.fontSize = '14px';
+          bubble.style.lineHeight = '1.4';
+
+          // Для AI используем HTML (чтобы работал Markdown из ответа), для юзера - текст (защита от XSS)
+          if (sender === 'ai') {
+              bubble.innerHTML = text;
+          } else {
+              bubble.innerText = text;
+          }
+
+          div.appendChild(bubble);
+          messages.appendChild(div);
+          messages.scrollTop = messages.scrollHeight;
+      }
+
+      async function sendMessage() {
+          const text = input.value.trim();
+          if (!text) return;
+
+          appendMessage(text, 'user');
+          input.value = '';
+
+          // Индикатор печати
+          const loadingId = 'loading-' + Date.now();
+          const loadingDiv = document.createElement('div');
+          loadingDiv.id = loadingId;
+          loadingDiv.style.marginBottom = '10px';
+          loadingDiv.innerHTML = '<small style="color:#6c757d; margin-left: 10px;"><i class="bi bi-three-dots"></i> Печатает...</small>';
+          messages.appendChild(loadingDiv);
+          messages.scrollTop = messages.scrollHeight;
+
+          try {
+              const response = await fetch('/api/chat/', {
+                  method: 'POST',
+                  headers: {
+                      'Content-Type': 'application/json',
+                      // Если вдруг понадобится CSRF, раскомментируй строку ниже:
+                      // 'X-CSRFToken': '{{ csrf_token }}'
+                  },
+                  body: JSON.stringify({message: text})
+              });
+
+              document.getElementById(loadingId).remove();
+
+              if (response.ok) {
+                  const data = await response.json();
+                  if (data.response) {
+                      appendMessage(data.response, 'ai');
+                  } else {
+                      appendMessage("Ошибка API: " + (data.error || "Неизвестная ошибка"), 'ai');
+                  }
+              } else {
+                  document.getElementById(loadingId).remove();
+                  appendMessage("Ошибка сервера: " + response.status, 'ai');
+              }
+          } catch (e) {
+              if(document.getElementById(loadingId)) document.getElementById(loadingId).remove();
+              appendMessage("Ошибка соединения. Проверьте интернет.", 'ai');
+              console.error(e);
+          }
+      }
+
+      sendBtn.addEventListener('click', sendMessage);
+
+      input.addEventListener('keypress', (e) => {
+          if (e.key === 'Enter') sendMessage();
+      });
+  </script>
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
-  </body>
+  <script src="{% static 'js/main.js' %}"></script>
+
+  {% block extra_js %}{% endblock %}
+</body>
 
 </html>

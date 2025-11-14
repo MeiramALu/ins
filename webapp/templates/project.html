@@ -2,22 +2,71 @@
 {% load static %}
 {% load i18n %}
 
+{% block extra_css %}
+{# Подключение общих CSS из файла style.css #}
+<link rel="stylesheet" href="{% static 'assets/css/style.css' %}">
+
+{# Подключение библиотек, которые не могут быть в style.css #}
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+<link href="https://unpkg.com/aos@2.3.1/dist/aos.css" rel="stylesheet">
+
+<style>
+    /* --- Эффект "Развернуть текст" с градиентом (УНИКАЛЬНЫЙ для этой страницы) --- */
+    .text-content-wrapper {
+        position: relative;
+        overflow: hidden;
+        transition: max-height 0.5s ease;
+    }
+    /* Состояние: Свернуто */
+    .text-collapsed {
+        max-height: 250px; /* Высота свернутого блока */
+        mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+        -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+    }
+    /* Состояние: Развернуто */
+    .text-expanded {
+        max-height: none; /* Высота по контенту */
+        mask-image: none;
+        -webkit-mask-image: none;
+    }
+
+    /* --- Стили для iframe предпросмотра (УНИКАЛЬНЫЙ для этой страницы) --- */
+    .preview-frame {
+        width: 100%;
+        height: 600px;
+        border: none;
+        background-color: #f8fafd; /* Светлый фон для iframe */
+    }
+</style>
+{% endblock extra_css %}
+
 {% block nav %}
 <section class="bg-dark text-white position-relative overflow-hidden pt-5 pb-4">
-  <div class="position-absolute w-100 h-100 top-0 start-0" style="background: linear-gradient(rgba(13, 22, 46, 0.9), rgba(13, 22, 46, 0.7)); background-size: cover; filter: grayscale(80%);">
+  <div class="position-absolute w-100 h-100 top-0 start-0"
+       style="background: linear-gradient(rgba(13, 22, 46, 0.92), rgba(13, 22, 46, 0.8));">
     {% if project.main_image %}
-    <img src="{{ project.main_image.url }}" class="img-fluid w-100 h-100 object-fit-cover" alt="{{ project.name }}">
-    {% else %}
-    <div class="w-100 h-100" style="background-color: #0d162e;"></div>
+        <img src="{{ project.main_image.url }}" class="img-fluid w-100 h-100 object-fit-cover"
+             style="filter: grayscale(100%); opacity: 0.3; mix-blend-mode: luminosity;" alt="{{ project.name }}">
+    {% elif settings.hero_image_project_detail %}
+        <img src="{{ settings.hero_image_project_detail.url }}" class="img-fluid w-100 h-100 object-fit-cover"
+             style="filter: grayscale(100%); opacity: 0.3;" alt="Project Details">
     {% endif %}
   </div>
 
   <div class="container py-5 text-center position-relative" style="z-index: 2;">
     <div class="row justify-content-center pt-5 pb-3">
-      <div class="col-lg-10 col-xl-8 pt-5 pb-3" data-aos="zoom-out">
-        <p class="fs-6 mb-2 text-primary text-uppercase fw-semibold text-shadow">{{ project.lab.name }} / {{ project.field.name }}</p>
-        <h1 class="display-3 fw-bolder mb-3 text-shadow">{{ project.name }}</h1>
-        <p class="fs-5 mb-0 text-light opacity-75 text-shadow">{{ project.description }}</p>
+      <div class="col-lg-10 col-xl-9 pt-5 pb-3" data-aos="fade-down" data-aos-duration="1000">
+
+        <div class="d-inline-flex align-items-center justify-content-center gap-2 mb-3 text-white-50 fs-6 fw-bold text-uppercase tracking-wider">
+            <span>{{ project.lab.name|default:"KAZNU" }}</span>
+            <i class="bi bi-chevron-right" style="font-size: 0.7em;"></i>
+            <span class="text-primary">{{ project.field.name }}</span>
+        </div>
+
+        <h1 class="display-3 fw-bolder mb-4 text-shadow">{{ project.name }}</h1>
+        <p class="fs-5 mb-0 text-light opacity-75 text-shadow mx-auto" style="max-width: 800px;">
+            {{ project.description }}
+        </p>
       </div>
     </div>
   </div>
@@ -29,79 +78,233 @@
     <div class="container">
         <div class="row gy-5">
 
+            {# --- ЛЕВАЯ КОЛОНКА: ОСНОВНОЙ КОНТЕНТ --- #}
             <div class="col-12 col-lg-8">
 
-                {% if project.youtube_url %}
-                    <div class="ratio ratio-16x9 mb-4 shadow-lg rounded-4 overflow-hidden">
-                        <iframe src="https://www.youtube.com/embed/{{ project.youtube_url|cut:'https://www.youtube.com/watch?v='|cut:'https://youtu.be/' }}"
-                                title="YouTube video player" frameborder="0"
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowfullscreen>
-                        </iframe>
+                {# 1. Блок МЕДИА (Видео YouTube или Фото) #}
+                <div class="mb-5" data-aos="fade-up">
+                    {% if project.youtube_url %}
+                        <div class="ratio ratio-16x9 shadow-lg rounded-4 overflow-hidden border border-4 border-light position-relative z-1">
+                            <iframe src="https://www.youtube.com/embed/{{ project.youtube_url }}?autoplay=0&controls=1&showinfo=0&rel=0"
+                                    title="YouTube video player" frameborder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowfullscreen>
+                            </iframe>
+                        </div>
+                        <div class="d-flex justify-content-end mt-3">
+                            <a href="https://www.youtube.com/watch?v={{ project.youtube_url }}" target="_blank"
+                               class="btn btn-danger rounded-pill px-4 fw-bold d-flex align-items-center gap-2 transition-transform hover-lift-sm">
+                                <i class="bi bi-youtube fs-5"></i> {% trans "Смотреть на YouTube" %}
+                            </a>
+                        </div>
+                    {% elif project.main_image %}
+                        <div class="shadow-lg rounded-4 overflow-hidden border border-4 border-light">
+                            <img src="{{ project.main_image.url }}" class="img-fluid w-100 object-fit-cover" alt="{{ project.name }}">
+                        </div>
+                    {% endif %}
+                </div>
+
+                {# 2. ОБЗОР ПРОЕКТА (С эффектом Mask Fade) #}
+                <div class="mb-5" data-aos="fade-up" data-aos-delay="100">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-square bg-primary text-white me-3 shadow-sm">
+                            <i class="bi bi-file-text"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0 text-dark">{% trans "Обзор проекта" %}</h2>
                     </div>
-                {% elif project.main_image %}
-                    <div class="mb-4 shadow-lg rounded-4 overflow-hidden">
-                        <img src="{{ project.main_image.url }}" class="img-fluid w-100 object-fit-cover" alt="{{ project.name }}">
+
+                    <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-light">
+                        {% if project.content %}
+                            <div id="textContent" class="text-content-wrapper text-collapsed fs-6 lh-lg text-secondary">
+                                {{ project.content|safe }}
+                            </div>
+
+                            <div class="text-center mt-3">
+                                <button id="toggleTextBtn" class="btn btn-outline-primary rounded-pill px-5 fw-bold transition-transform hover-lift-sm">
+                                    {% trans "Развернуть описание" %} <i class="bi bi-chevron-down ms-2"></i>
+                                </button>
+                            </div>
+                        {% else %}
+                            <p class="text-muted fst-italic">{% trans "Полное описание проекта готовится к публикации." %}</p>
+                        {% endif %}
                     </div>
+                </div>
+
+                 {# 3. ТЕХНИЧЕСКИЕ БЛОКИ (Область и Преимущества) #}
+                <div class="row gy-4 mb-5">
+
+                    {# --- БЛОК: Область применения --- #}
+                    {% if project.application_area %}
+                    <div class="col-md-6" data-aos="fade-right" data-aos-delay="200">
+                        <div class="card h-100 border-0 shadow-lg rounded-4 p-4 border-left-accent bg-white transition-transform hover-lift-sm">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-rocket-takeoff text-primary fs-2 me-3"></i>
+                                <h4 class="fw-bold mb-0 h5">{% trans "Область применения" %}</h4>
+                            </div>
+
+                            <div id="appContent" class="text-content-wrapper text-collapsed text-secondary small lh-base">
+                                {{ project.application_area|safe }}
+                            </div>
+
+                            <div class="mt-3 text-center">
+                                <button id="toggleAppBtn" class="btn btn-sm btn-link text-decoration-none fw-bold">
+                                    {% trans "Развернуть" %} <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {# --- БЛОК: Преимущества --- #}
+                    {% if project.superiority %}
+                    <div class="col-md-6" data-aos="fade-left" data-aos-delay="200">
+                        <div class="card h-100 border-0 shadow-lg rounded-4 p-4 border-left-accent success bg-white transition-transform hover-lift-sm">
+                            <div class="d-flex align-items-center mb-3">
+                                <i class="bi bi-patch-check text-success fs-2 me-3"></i>
+                                <h4 class="fw-bold mb-0 h5">{% trans "Преимущества" %}</h4>
+                            </div>
+
+                            <div id="supContent" class="text-content-wrapper text-collapsed text-secondary small lh-base">
+                                {{ project.superiority|safe }}
+                            </div>
+
+                            <div class="mt-3 text-center">
+                                <button id="toggleSupBtn" class="btn btn-sm btn-link text-success text-decoration-none fw-bold">
+                                    {% trans "Развернуть" %} <i class="bi bi-chevron-down"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                {# 4. ПУБЛИКАЦИИ И РЕСУРСЫ #}
+                {% if project.project_url %}
+                <div class="mb-5" data-aos="fade-up" data-aos-delay="300">
+                    <div class="d-flex align-items-center mb-4">
+                        <div class="icon-square bg-warning text-white me-3 shadow-sm">
+                            <i class="bi bi-link-45deg"></i>
+                        </div>
+                        <h2 class="fw-bold mb-0 text-dark">{% trans "Публикации и ссылки" %}</h2>
+                    </div>
+
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+                        <div class="card-body p-4 p-md-5">
+                            <div class="d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3 mb-4">
+                                <div>
+                                    <h5 class="fw-bold mb-1">{% trans "Связанный веб-ресурс / Статья" %}</h5>
+                                    <p class="text-muted small mb-0">{{ project.project_url|truncatechars:70 }}</p>
+                                </div>
+                                <div class="d-flex gap-2">
+                                    <button id="toggle-web-preview" class="btn btn-outline-primary rounded-pill fw-bold">
+                                        <i class="bi bi-eye"></i> {% trans "Предпросмотр" %}
+                                    </button>
+                                    <a href="{{ project.project_url }}" target="_blank" class="btn btn-primary rounded-pill fw-bold">
+                                        {% trans "Перейти" %} <i class="bi bi-box-arrow-up-right ms-1"></i>
+                                    </a>
+                                </div>
+                            </div>
+
+                            <div id="web-preview-container" class="mt-4 d-none rounded-3 overflow-hidden border shadow-sm">
+                                <div class="bg-light p-2 text-center border-bottom text-muted small">
+                                    {% trans "Предпросмотр может не работать, если сайт запрещает встраивание (iframe)." %}
+                                </div>
+                                <iframe src="{{ project.project_url }}" class="preview-frame"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
 
-                <article class="project-content mt-5">
-                    <h2 class="fw-bolder mb-3">{% trans "Обзор проекта" %}</h2>
-                    {% if project.content %}
-                        {{ project.content|safe }}
-                    {% else %}
-                        <p class="text-secondary">{% trans "Полное описание проекта будет добавлено позднее." %}</p>
-                    {% endif %}
-                </article>
-
+                {# 5. PDF ДОКУМЕНТАЦИЯ #}
                 {% if project.pdf_file %}
-                    <div class="alert alert-info mt-5 d-flex align-items-center rounded-pill shadow-sm transition-transform hover-lift-sm" role="alert">
-                        <i class="bi bi-file-earmark-pdf-fill me-3 fs-3"></i>
-                        <div>
-                            {% trans "Документ проекта доступен для скачивания." %}
+                <div data-aos="fade-up" data-aos-delay="400">
+                     <div class="d-flex align-items-center mb-4">
+                        <div class="icon-square bg-info text-white me-3 shadow-sm">
+                            <i class="bi bi-file-earmark-pdf"></i>
                         </div>
-                        <a href="{{ project.pdf_file.url }}" target="_blank" class="btn btn-sm btn-primary rounded-pill ms-auto">
-                            {% trans "Скачать PDF" %} <i class="bi bi-download"></i>
-                        </a>
+                        <h2 class="fw-bold mb-0 text-dark">{% trans "Документация проекта" %}</h2>
                     </div>
+
+                    <div class="card border-0 shadow-lg rounded-4 overflow-hidden bg-white">
+                        <div class="card-body p-4 p-md-5 text-center">
+                             <p class="text-secondary mb-4">{% trans "Ознакомьтесь с подробной технической документацией проекта в формате PDF." %}</p>
+                             <button id="toggle-pdf-reader" class="btn btn-dark rounded-pill px-5 py-2 fw-bold transition-transform hover-lift-sm">
+                                {% trans "Открыть PDF документ" %} <i class="bi bi-filetype-pdf ms-2"></i>
+                            </button>
+
+                            <a href="{{ project.pdf_file.url }}" target="_blank" class="btn btn-outline-dark rounded-pill px-5 py-2 fw-bold ms-3 transition-transform hover-lift-sm">
+                                {% trans "Скачать PDF" %} <i class="bi bi-download ms-2"></i>
+                            </a>
+
+                            <div id="pdf-reader-container" class="mt-5 d-none shadow rounded-4 overflow-hidden border border-light">
+                                <div class="ratio ratio-4x3">
+                                    <iframe src="{{ project.pdf_file.url }}" style="border: none;"></iframe>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
                 {% endif %}
 
             </div>
 
+            {# --- ПРАВАЯ КОЛОНКА: ИНФОРМАЦИЯ --- #}
             <div class="col-12 col-lg-4">
-                <div class="card border-0 shadow-lg rounded-4 p-4 sticky-top" style="top: 20px;">
-                    <h4 class="fw-bolder mb-4">{% trans "Ключевые детали" %}</h4>
+                <div class="sticky-top" style="top: 100px; z-index: 10;">
 
-                    <ul class="list-unstyled mb-0">
-                        <li class="mb-3 d-flex justify-content-between">
-                            <span class="fw-semibold">{% trans "Лаборатория:" %}</span>
-                            <span class="text-primary fw-bold">{{ project.lab.name }}</span>
-                        </li>
-                        <li class="mb-3 d-flex justify-content-between">
-                            <span class="fw-semibold">{% trans "Направление:" %}</span>
-                            <span class="text-secondary">{{ project.field.name }}</span>
-                        </li>
-                        <li class="mb-3 d-flex justify-content-between">
-                            <span class="fw-semibold">{% trans "Заказчик:" %}</span>
-                            <span class="text-secondary">{{ project.client_name|default:"-" }}</span>
-                        </li>
-                        <li class="mb-3 d-flex justify-content-between">
-                            <span class="fw-semibold">{% trans "Год завершения:" %}</span>
-                            <span class="text-secondary">{{ project.year_completed|default:"-" }}</span>
-                        </li>
-                        <li class="mb-3 d-flex justify-content-between">
-                            <span class="fw-semibold">{% trans "Технологии:" %}</span>
-                            <span class="text-secondary text-end">{{ project.technologies|default:"-" }}</span>
-                        </li>
-                    </ul>
-
-                    {% if project.project_url %}
-                        <div class="mt-4 pt-3 border-top">
-                            <a href="{{ project.project_url }}" target="_blank" class="btn btn-primary btn-lg w-100 rounded-pill transition-transform hover-lift">
-                                {% trans "Посмотреть проект" %} <i class="bi bi-arrow-up-right-square"></i>
+                    {# Карточка Руководителя #}
+                    {% if project.author_member %}
+                    <div class="card border-0 shadow-lg rounded-4 text-center overflow-hidden mb-4" data-aos="fade-left">
+                        <div class="card-header bg-white border-0 pt-4 pb-0">
+                             <h5 class="text-uppercase text-secondary fw-bold small ls-1">{% trans "Руководитель проекта" %}</h5>
+                        </div>
+                        <div class="card-body p-4">
+                            <img src="{% if project.author_member.photo %}{{ project.author_member.photo.url }}{% else %}https://placehold.co/400x400/334155/ffffff?text={{ project.author_member.name|urlencode }}{% endif %}"
+                                 class="rounded-circle mb-3 shadow-sm object-fit-cover"
+                                 style="width: 120px; height: 120px;"
+                                 alt="{{ project.author_member.name }}">
+                            <h4 class="fw-bold mb-1">{{ project.author_member.name }}</h4>
+                            <p class="text-primary small mb-3">{{ project.author_member.position }}</p>
+                            <a href="{% url 'team_member_detail' pk=project.author_member.pk %}" class="btn btn-sm btn-outline-primary rounded-pill px-4 transition-transform hover-lift-sm">
+                                {% trans "Профиль" %}
                             </a>
                         </div>
+                    </div>
                     {% endif %}
+
+                    {# Детали проекта #}
+                    <div class="card border-0 shadow-lg rounded-4 p-4" data-aos="fade-left" data-aos-delay="100">
+                        <h5 class="fw-bold mb-4 border-bottom pb-2">{% trans "Детали проекта" %}</h5>
+
+                        <div class="vstack gap-3">
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary"><i class="bi bi-building me-2"></i>{% trans "Лаборатория" %}</span>
+                                <span class="fw-semibold text-end">{{ project.lab.name|default:"-" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary"><i class="bi bi-person-badge me-2"></i>{% trans "Заказчик" %}</span>
+                                <span class="fw-semibold text-end">{{ project.client_name|default:"-" }}</span>
+                            </div>
+                            <div class="d-flex justify-content-between">
+                                <span class="text-secondary"><i class="bi bi-calendar-check me-2"></i>{% trans "Год" %}</span>
+                                <span class="fw-semibold text-end">{{ project.year_completed|default:"-" }}</span>
+                            </div>
+
+                            {% if project.technologies %}
+                            <div class="pt-2">
+                                <span class="text-secondary d-block mb-2"><i class="bi bi-cpu me-2"></i>{% trans "Технологии" %}</span>
+                                <div class="d-flex flex-wrap gap-1 justify-content-end">
+                                    {% for tech in project.technologies.split|slice:":5" %}
+                                    {# Предполагаем, что технологии разделены пробелом или запятой, простая имитация тегов #}
+                                        <span class="badge bg-light text-dark border">{{ tech|cut:"," }}</span>
+                                    {% endfor %}
+                                </div>
+                            </div>
+                            {% endif %}
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -109,24 +312,184 @@
     </div>
 </section>
 
-{% if related_projects %}
-<section class="py-5 py-xl-8 bg-light">
-    <div class="container">
-        <h2 class="fw-bolder mb-4">{% trans "Похожие проекты" %}</h2>
-        <div class="row gy-4 gx-4">
-            {% for rp in related_projects %}
-            <div class="col-12 col-md-6">
-                <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden transition-transform hover-lift-sm">
-                    <div class="card-body">
-                        <h5 class="fw-bold">{{ rp.name }}</h5>
-                        <p class="text-secondary small mb-0">{{ rp.description|truncatewords:15 }}</p>
-                        <a href="{{ rp.get_absolute_url }}" class="small fw-semibold link-primary mt-2 d-inline-block">{% trans "Подробнее" %}</a>
+{# --- СЕКЦИЯ: КОМАНДА ПРОЕКТА (СЛАЙДЕР) --- #}
+{% if project_team %}
+<section class="py-5 bg-light border-top border-secondary border-opacity-10">
+    <div class="container" data-aos="fade-up">
+        <div class="d-flex justify-content-between align-items-end mb-4">
+            <h2 class="fw-bolder mb-0">{% trans "Команда проекта" %}</h2>
+            <div class="text-secondary small"><i class="bi bi-people-fill me-1"></i> {{ project_team.count }} {% trans "участников" %}</div>
+        </div>
+
+        <div class="swiper projectTeamSwiper swiper-pb-5">
+            <div class="swiper-wrapper">
+                {% for member in project_team %}
+                <div class="swiper-slide">
+                    <div class="card card-equal-height border-0 shadow-sm rounded-4 w-100 overflow-hidden transition-transform hover-lift-sm text-center bg-white">
+                        <a href="{{ member.get_absolute_url }}" class="d-block">
+                            <figure class="m-0 ratio ratio-1x1">
+                                <img src="{% if member.photo %}{{ member.photo.url }}{% else %}https://placehold.co/400x400/334155/ffffff?text={{ member.name|urlencode }}{% endif %}"
+                                    class="img-fluid w-100 h-100 object-fit-cover" alt="{{ member.name }}"
+                                    style="filter: grayscale(100%); transition: filter 0.3s;"
+                                    onmouseover="this.style.filter='grayscale(0%)'"
+                                    onmouseout="this.style.filter='grayscale(100%)'">
+                            </figure>
+                        </a>
+                        <div class="card-body p-3">
+                            <h6 class="fw-bold mb-1 text-truncate">{{ member.name }}</h6>
+                            <p class="text-primary small mb-0 text-truncate">{{ member.position }}</p>
+                        </div>
                     </div>
                 </div>
+                {% endfor %}
             </div>
-            {% endfor %}
+            <div class="swiper-pagination"></div>
+        </div>
+    </div>
+</section>
+{% endif %}
+
+{# --- СЕКЦИЯ: ПОХОЖИЕ ПРОЕКТЫ (СЛАЙДЕР) --- #}
+{% if related_projects %}
+<section class="py-5 bg-white">
+    <div class="container" data-aos="fade-up">
+        <h2 class="fw-bolder mb-4">{% trans "Похожие проекты" %}</h2>
+
+        <div class="swiper relatedProjectsSwiper swiper-pb-5">
+            <div class="swiper-wrapper">
+                {% for rp in related_projects %}
+                <div class="swiper-slide">
+                    <div class="card card-equal-height h-100 border-0 shadow-lg rounded-4 overflow-hidden w-100 transition-transform hover-lift-sm">
+                        <div class="card-body p-4 d-flex flex-column">
+                            <h5 class="fw-bold mb-2">
+                                <a href="{{ rp.get_absolute_url }}" class="text-dark text-decoration-none hover-link-primary">{{ rp.name }}</a>
+                            </h5>
+                            <p class="text-secondary small mb-3 line-clamp-3 flex-grow-1">{{ rp.description|striptags }}</p>
+                            <div class="mt-auto">
+                                <a href="{{ rp.get_absolute_url }}" class="small fw-bold link-primary link-animated">
+                                    {% trans "Подробнее" %} <i class="bi bi-arrow-right"></i>
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endfor %}
+            </div>
+            <div class="swiper-pagination"></div>
         </div>
     </div>
 </section>
 {% endif %}
 {% endblock main %}
+
+{# --- JS ДЛЯ СЛАЙДЕРОВ, AOS И КНОПОК --- #}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+<script src="https://unpkg.com/aos@2.3.1/dist/aos.js"></script>
+<script>
+  document.addEventListener('DOMContentLoaded', function () {
+
+    // 1. Инициализация анимаций
+    AOS.init({
+        duration: 800,
+        once: true,
+        mirror: false,
+    });
+
+    // 2. Универсальная функция для кнопок "Развернуть/Свернуть"
+    function initToggle(contentId, btnId, expandText, collapseText) {
+        const content = document.getElementById(contentId);
+        const btn = document.getElementById(btnId);
+
+        if (content && btn) {
+            btn.addEventListener('click', function() {
+                if (content.classList.contains('text-collapsed')) {
+                    // Разворачиваем
+                    content.classList.remove('text-collapsed');
+                    content.classList.add('text-expanded');
+                    btn.innerHTML = collapseText + ' <i class="bi bi-chevron-up ms-1"></i>';
+                } else {
+                    // Сворачиваем
+                    content.classList.remove('text-expanded');
+                    content.classList.add('text-collapsed');
+                    btn.innerHTML = expandText + ' <i class="bi bi-chevron-down ms-1"></i>';
+                }
+            });
+        }
+    }
+
+    // Применяем функцию ко всем 3 блокам:
+    // А) Обзор проекта
+    initToggle('textContent', 'toggleTextBtn', '{% trans "Развернуть описание" %}', '{% trans "Свернуть описание" %}');
+
+    // Б) Область применения
+    initToggle('appContent', 'toggleAppBtn', '{% trans "Развернуть" %}', '{% trans "Свернуть" %}');
+
+    // В) Преимущества
+    initToggle('supContent', 'toggleSupBtn', '{% trans "Развернуть" %}', '{% trans "Свернуть" %}');
+
+
+    // 3. Логика "Предпросмотр" (Веб-сайт)
+    const toggleWebBtn = document.getElementById('toggle-web-preview');
+    const webContainer = document.getElementById('web-preview-container');
+    if(toggleWebBtn && webContainer) {
+        toggleWebBtn.addEventListener('click', function() {
+            if (webContainer.classList.contains('d-none')) {
+                webContainer.classList.remove('d-none');
+                this.innerHTML = '<i class="bi bi-eye-slash"></i> {% trans "Скрыть предпросмотр" %}';
+            } else {
+                webContainer.classList.add('d-none');
+                this.innerHTML = '<i class="bi bi-eye"></i> {% trans "Предпросмотр" %}';
+            }
+        });
+    }
+
+    // 4. Логика "Предпросмотр" (PDF)
+    const togglePdfBtn = document.getElementById('toggle-pdf-reader');
+    const pdfContainer = document.getElementById('pdf-reader-container');
+    if (togglePdfBtn && pdfContainer) {
+        togglePdfBtn.addEventListener('click', function() {
+            if (pdfContainer.classList.contains('d-none')) {
+                pdfContainer.classList.remove('d-none');
+                this.innerHTML = '{% trans "Скрыть PDF документ" %} <i class="bi bi-chevron-up ms-2"></i>';
+            } else {
+                pdfContainer.classList.add('d-none');
+                this.innerHTML = '{% trans "Открыть PDF документ" %} <i class="bi bi-filetype-pdf ms-2"></i>';
+            }
+        });
+    }
+
+    // 5. Слайдеры Swiper
+    const commonSwiperOptions = {
+        loop: false,
+        spaceBetween: 20,
+        pagination: {
+            el: ".swiper-pagination",
+            clickable: true,
+        },
+        breakpoints: {
+            0: { slidesPerView: 1.1, spaceBetween: 15 },
+            576: { slidesPerView: 2 },
+            768: { slidesPerView: 2.5 },
+            992: { slidesPerView: 3 },
+            1200: { slidesPerView: 4 }
+        }
+    };
+
+    if (document.querySelector('.projectTeamSwiper')) {
+        new Swiper(".projectTeamSwiper", commonSwiperOptions);
+    }
+
+    if (document.querySelector('.relatedProjectsSwiper')) {
+        new Swiper(".relatedProjectsSwiper", {
+            ...commonSwiperOptions,
+            breakpoints: {
+                0: { slidesPerView: 1.1, spaceBetween: 15 },
+                768: { slidesPerView: 2 },
+                1024: { slidesPerView: 3 }
+            }
+        });
+    }
+  });
+</script>
+{% endblock extra_js %}
